@@ -536,6 +536,16 @@ class GameNotifier extends StateNotifier<GameState> {
     }
   }
 
+  void removeArtifact(String artifactId) {
+    if (state.activeArtifactIds.contains(artifactId)) {
+      final newIds = state.activeArtifactIds
+          .where((id) => id != artifactId)
+          .toList();
+      HiveService.settingsBox.put('activeArtifactIds', newIds);
+      state = _copyWith(activeArtifactIds: newIds);
+    }
+  }
+
   // Quest Methods
   void completeQuest(String questId) {
     if (!state.completedQuestIds.contains(questId)) {

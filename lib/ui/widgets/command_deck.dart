@@ -163,7 +163,7 @@ class HeroTab extends ConsumerWidget {
                       const SizedBox(width: 16),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.2),
+                          color: Colors.amber.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.amber),
                         ),
@@ -259,13 +259,47 @@ class HeroTab extends ConsumerWidget {
           style: const TextStyle(color: Colors.amber, fontSize: 18),
         ),
       );
-    } else if (hero.status == HeroStatus.dead) {
-      return ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-        onPressed: () {
-          // Revive logic or new era?
-        },
-        child: const Text("HERO FALLEN", style: TextStyle(color: Colors.white)),
+    } else if (hero.status == HeroStatus.recovering ||
+        hero.status == HeroStatus.dead) {
+      final reviveCost = 50 * hero.level;
+      final gold = ref.watch(gameProvider).gold;
+      final canAfford = gold >= reviveCost;
+      final pct = (hero.hp / hero.maxHp * 100).clamp(0, 100).toInt();
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Recovering... $pct%",
+            style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: canAfford ? Colors.red[800] : Colors.grey[800],
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: canAfford
+                  ? () {
+                      ref.read(gameProvider.notifier).spendGold(reviveCost);
+                      ref
+                          .read(heroProvider.notifier)
+                          .updateHero(
+                            hero.copyWith(
+                              hp: hero.maxHp,
+                              status: HeroStatus.idle,
+                            ),
+                          );
+                    }
+                  : null,
+              child: Text(
+                "Revive ($reviveCost g)",
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
       );
     } else {
       return ElevatedButton(

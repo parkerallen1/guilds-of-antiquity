@@ -70,8 +70,9 @@ class QuestMap extends ConsumerWidget {
                   return Stack(
                     children: [
                       ...mainQuests.map((quest) {
-                        if (quest.requiredQuestId == null)
+                        if (quest.requiredQuestId == null) {
                           return const SizedBox.shrink();
+                        }
                         final parent = questService.getQuestById(
                           quest.requiredQuestId!,
                         );
@@ -93,8 +94,8 @@ class QuestMap extends ConsumerWidget {
                             ),
                             color:
                                 gameState.completedQuestIds.contains(parent.id)
-                                ? Colors.amber.withOpacity(0.6)
-                                : Colors.grey.withOpacity(0.3),
+                                ? Colors.amber.withValues(alpha: 0.6)
+                                : Colors.grey.withValues(alpha: 0.3),
                           ),
                         );
                       }),
@@ -166,7 +167,7 @@ class QuestMap extends ConsumerWidget {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.7),
+                                    color: Colors.black.withValues(alpha: 0.7),
                                     blurRadius: 4,
                                     offset: const Offset(2, 2),
                                   ),
@@ -278,7 +279,7 @@ class QuestMap extends ConsumerWidget {
               border: Border.all(color: Colors.amber, width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -323,7 +324,7 @@ class QuestMap extends ConsumerWidget {
           border: Border.all(color: Colors.amber),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -397,7 +398,7 @@ class QuestMap extends ConsumerWidget {
         decoration: BoxDecoration(
           color: Colors.grey[900],
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -746,11 +747,15 @@ class QuestMap extends ConsumerWidget {
     Quest quest,
     HeroModel hero,
   ) {
-    // Health Check: Cannot go if <= 0 HP
-    if (hero.hp <= 0) {
+    // Cannot quest if downed/recovering or otherwise not idle.
+    if (hero.hp <= 0 || hero.status != HeroStatus.idle) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Hero is too weak! Heal up before questing."),
+        SnackBar(
+          content: Text(
+            hero.status == HeroStatus.recovering
+                ? "${hero.name} is still recovering."
+                : "Hero is not ready to quest yet.",
+          ),
           backgroundColor: Colors.red,
         ),
       );

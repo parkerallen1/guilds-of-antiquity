@@ -50,30 +50,32 @@ class TickerService {
       }
     }
 
-    // 2. Passive healing
+    // 2. Passive healing. Idle heroes recover slowly; downed (recovering)
+    //    heroes recover ~3x faster, then flip back to idle once fully healed.
     for (final hero in heroes) {
-      if (hero.status == HeroStatus.idle && hero.hp < hero.maxHp) {
-        // Heal to 100% in 1 hour (3600s) base.
-        // Speed reduces this time.
-        // Formula: Time = 3600 * (100 / (100 + Speed))
-        // HealPerSec = MaxHP / Time
+      final isResting =
+          hero.status == HeroStatus.idle ||
+          hero.status == HeroStatus.recovering;
+
+      if (isResting && hero.hp < hero.maxHp) {
+        // Heal to 100% in 1 hour (3600s) base; Speed reduces this time.
+        // Use a per-tick probability so fractional heal rates average out.
         double speedFactor = 100.0 / (100.0 + hero.totalSpd);
         double timeToHeal = 3600.0 * speedFactor;
         double healPerSec = hero.maxHp / timeToHeal;
+        if (hero.status == HeroStatus.recovering) healPerSec *= 3.0;
 
-        // Accumulate healing? Or just heal 1 HP if enough time passed?
-        // Since we tick every second, we can add float and floor?
-        // HeroModel HP is int.
-        // Let's just add probability or accumulate.
-        // Simple approach: Add 1 HP every X ticks.
-        // X = 1 / healPerSec.
-        // Example: MaxHP 100. Time 3600. HealPerSec = 0.027.
-        // Need ~36 seconds for 1 HP.
-        // Let's use a random chance to heal 1 HP to average it out.
         if (_random.nextDouble() < healPerSec) {
           int newHp = min(hero.maxHp, hero.hp + 1);
           heroNotifier.updateHero(hero.copyWith(hp: newHp));
         }
+      } else if (hero.status == HeroStatus.recovering &&
+          hero.hp >= hero.maxHp) {
+        heroNotifier.updateHero(hero.copyWith(status: HeroStatus.idle));
+        logNotifier.addLog(
+          "${hero.name} has fully recovered and is ready for battle.",
+          LogType.info,
+        );
       }
     }
 
@@ -227,20 +229,20 @@ class TickerService {
 
       if (loot != null) {
         logNotifier.addLog(
-          "FOUND: ${loot.name} (${loot!.rarity.name})!",
+          "FOUND: ${loot.name} (${loot.rarity.name})!",
           LogType.loot,
         );
 
         // Add item to shared inventory
-        gameNotifier.addItem(loot!);
+        gameNotifier.addItem(loot);
 
-        if (loot!.rarity == ItemRarity.legendary) {
+        if (loot.rarity == ItemRarity.legendary) {
           audio.playLegendaryDrop();
           feedback.vibrate();
         } else {
           feedback.lightImpact();
         }
-        feedback.showFloatingText('Found ${loot!.name}!', FeedbackType.info);
+        feedback.showFloatingText('Found ${loot.name}!', FeedbackType.info);
       }
 
       // Update Quest Progress
@@ -270,11 +272,6 @@ class TickerService {
     // Calculate Health Loss (happens regardless of success/failure)
     int damage = GameLogic.calculateHealthLoss(hero, quest);
     if (damage > 0) {
-      int newHp = max(0, hero.hp - damage);
-      heroNotifier.updateHero(
-        hero.copyWith(hp: newHp),
-      ); // Temporary update before final save
-
       logNotifier.addLog("${hero.name} lost $damage HP.", LogType.combat);
       feedback.showFloatingText('-$damage HP', FeedbackType.damage);
     } else {
@@ -296,14 +293,51 @@ class TickerService {
       audio.playGoldSound();
     }
 
+    // Resolve survival. If the hero would be downed, an active Phoenix Feather
+    // (any preventDeath artifact) is consumed to keep them at 1 HP. Otherwise
+    // the hero enters RECOVERING and must heal before questing again.
+    int finalHp = hero.hp - damage;
+    HeroStatus finalStatus = HeroStatus.idle;
+
+    if (finalHp <= 0) {
+      String? saviorId;
+      String? saviorName;
+      for (final artifact in ref.read(gameProvider).activeArtifacts) {
+        if (artifact.preventDeath(hero)) {
+          saviorId = artifact.id;
+          saviorName = artifact.name;
+          break;
+        }
+      }
+
+      if (saviorId != null) {
+        gameNotifier.removeArtifact(saviorId);
+        finalHp = 1;
+        finalStatus = HeroStatus.idle;
+        logNotifier.addLog(
+          "The $saviorName shatters — ${hero.name} cheats death!",
+          LogType.loot,
+        );
+        feedback.vibrate();
+      } else {
+        finalHp = 1;
+        finalStatus = HeroStatus.recovering;
+        logNotifier.addLog(
+          "${hero.name} has fallen and must recover before questing again.",
+          LogType.combat,
+        );
+        feedback.triggerShake();
+      }
+    }
+
     final updatedHero = hero.copyWith(
       xp: newXp,
       level: newLevel,
       upgradePoints: newUpgradePoints,
-      status: HeroStatus.idle,
+      status: finalStatus,
       questCompletesAt: null, // Clear the timestamp
       activeQuestId: null, // Clear active quest
-      hp: max(0, hero.hp - damage), // Apply damage to final state
+      hp: finalHp,
     );
 
     heroNotifier.updateHero(updatedHero);

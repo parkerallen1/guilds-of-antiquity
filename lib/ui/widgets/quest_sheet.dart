@@ -213,8 +213,8 @@ class QuestSheet extends ConsumerWidget {
               Icon(
                 isCompleted
                     ? (quest.isReplayable
-                          ? FontAwesomeIcons.redo
-                          : FontAwesomeIcons.checkCircle)
+                          ? FontAwesomeIcons.arrowRotateRight
+                          : FontAwesomeIcons.circleCheck)
                     : (isLocked
                           ? FontAwesomeIcons.lock
                           : FontAwesomeIcons.skull),
@@ -372,7 +372,7 @@ class QuestSheet extends ConsumerWidget {
                           quest.title,
                           style: GoogleFonts.cinzel(
                             color: isLockedByHints
-                                ? Colors.purpleAccent.withOpacity(0.7)
+                                ? Colors.purpleAccent.withValues(alpha: 0.7)
                                 : Colors.white,
                           ),
                         ),
@@ -565,11 +565,15 @@ class QuestSheet extends ConsumerWidget {
     Quest quest,
     HeroModel hero,
   ) {
-    // Health Check: Cannot go if <= 0 HP
-    if (hero.hp <= 0) {
+    // Cannot quest if downed/recovering or otherwise not idle.
+    if (hero.hp <= 0 || hero.status != HeroStatus.idle) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Hero is too weak! Heal up before questing."),
+        SnackBar(
+          content: Text(
+            hero.status == HeroStatus.recovering
+                ? "${hero.name} is still recovering."
+                : "Hero is not ready to quest yet.",
+          ),
           backgroundColor: Colors.red,
         ),
       );
