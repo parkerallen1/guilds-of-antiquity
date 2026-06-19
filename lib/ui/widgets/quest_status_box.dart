@@ -124,12 +124,12 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
       width: 200,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.withOpacity(0.5)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -176,7 +176,7 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
       width: 200,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.9),
+        color: Colors.black.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: result.success ? Colors.green : Colors.red,
@@ -184,7 +184,7 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (result.success ? Colors.green : Colors.red).withOpacity(
+            color: (result.success ? Colors.green : Colors.red).withValues(alpha: 
               0.2,
             ),
             blurRadius: 10,

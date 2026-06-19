@@ -26,7 +26,7 @@ class HeroDetailSheet extends ConsumerWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -356,7 +356,7 @@ class HeroDetailSheet extends ConsumerWidget {
           border: Border.all(
             color: item != null
                 ? _getRarityColor(item.rarity)
-                : Colors.grey.withOpacity(0.3),
+                : Colors.grey.withValues(alpha: 0.3),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -373,7 +373,7 @@ class HeroDetailSheet extends ConsumerWidget {
                   _getIconForSlot(slot),
                   color: item != null
                       ? _getRarityColor(item.rarity)
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                 )
               : null,
         ),

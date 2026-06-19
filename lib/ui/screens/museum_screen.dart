@@ -74,7 +74,7 @@ class MuseumScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.grey[900],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -172,7 +172,7 @@ class MuseumScreen extends ConsumerWidget {
         border: Border.all(
           color: isUnlocked
               ? _getRarityColor(item.rarity)
-              : Colors.grey.withOpacity(0.3),
+              : Colors.grey.withValues(alpha: 0.3),
           width: isUnlocked ? 2 : 1,
         ),
       ),
@@ -191,7 +191,7 @@ class MuseumScreen extends ConsumerWidget {
                           ))
                   : Icon(
                       Icons.lock,
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       size: 30,
                     ),
             ),

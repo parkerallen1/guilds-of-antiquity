@@ -50,7 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // No Hero Overlay
           if (hero == null)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

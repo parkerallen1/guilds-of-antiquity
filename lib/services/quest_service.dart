@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../models/quest_model.dart';
 
@@ -28,7 +29,7 @@ class QuestService {
       _allQuests = jsonList.map((json) => Quest.fromJson(json)).toList();
       _isLoaded = true;
     } catch (e) {
-      print("Error loading quests: $e");
+      debugPrint("Error loading quests: $e");
       // Fallback or rethrow
     }
   }

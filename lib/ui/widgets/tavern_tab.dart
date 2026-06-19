@@ -310,8 +310,10 @@ class _TavernTabState extends ConsumerState<TavernTab> {
 }
 
 class AnimateExclamation extends StatefulWidget {
+  const AnimateExclamation({super.key});
+
   @override
-  _AnimateExclamationState createState() => _AnimateExclamationState();
+  State<AnimateExclamation> createState() => _AnimateExclamationState();
 }
 
 class _AnimateExclamationState extends State<AnimateExclamation>

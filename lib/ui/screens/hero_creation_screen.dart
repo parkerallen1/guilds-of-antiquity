@@ -7,7 +7,6 @@ import 'package:uuid/uuid.dart';
 import '../../providers/hero_provider.dart';
 import '../../models/hero_model.dart';
 import '../../utils/text_gen.dart';
-import '../../utils/asset_utils.dart';
 
 class HeroCreationScreen extends ConsumerStatefulWidget {
   const HeroCreationScreen({super.key});
@@ -229,7 +228,7 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
 
             // Class Selection
             DropdownButtonFormField<String>(
-              value: _selectedClass,
+              initialValue: _selectedClass,
               dropdownColor: Colors.grey[850],
               style: GoogleFonts.cinzel(color: Colors.white),
               decoration: const InputDecoration(

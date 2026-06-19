@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final audioServiceProvider = Provider<AudioService>((ref) {
@@ -7,7 +8,6 @@ final audioServiceProvider = Provider<AudioService>((ref) {
 
 class AudioService {
   final AudioPlayer _musicPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
 
   AudioService() {
     _musicPlayer.setReleaseMode(ReleaseMode.loop);
@@ -19,7 +19,7 @@ class AudioService {
       await _musicPlayer.play(AssetSource(assetPath));
     } catch (e) {
       // Ignore errors for now as assets might not exist yet
-      print('Error playing music: $e');
+      debugPrint('Error playing music: $e');
     }
   }
 
@@ -29,15 +29,14 @@ class AudioService {
 
   Future<void> playSfx(String assetPath) async {
     try {
-      // For SFX, we might want multiple players or one-shot
-      // creating a new player for overlapping sounds is better for game feel
+      // Creating a new player for overlapping sounds is better for game feel
       final player = AudioPlayer();
       await player.play(AssetSource(assetPath));
       player.onPlayerComplete.listen((_) {
         player.dispose();
       });
     } catch (e) {
-      print('Error playing sfx: $e');
+      debugPrint('Error playing sfx: $e');
     }
   }
 
