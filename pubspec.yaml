@@ -75,16 +75,12 @@ flutter:
   assets:
     - assets/images/
     - assets/images/backgrounds/
-    - assets/images/characters/
     - assets/images/heroes/
     - assets/images/icons/
-    - assets/images/illustrations/
     - assets/images/items/
     - assets/images/items/legendary/sword/
     - assets/images/items/legendary/dagger/
     - assets/images/items/legendary/staff/
-    - assets/images/ui/
-    - assets/images/ui/textures/
     - assets/data/
 
   fonts:

@@ -61,7 +61,7 @@ class _EndGameDialogState extends ConsumerState<EndGameDialog> {
               height: 100,
               decoration: BoxDecoration(
                 color: Colors.black54,
-                border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+                border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.3)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: vaultItems.isEmpty
@@ -208,6 +208,7 @@ class _EndGameDialogState extends ConsumerState<EndGameDialog> {
                   );
 
                   if (confirm == true) {
+                    if (!context.mounted) return;
                     Navigator.pop(context); // Close EndGameDialog
                     await ref.read(gameProvider.notifier).resetGame();
 

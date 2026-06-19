@@ -48,7 +48,7 @@ class _ShopTabState extends ConsumerState<ShopTab> {
             .updateShopQuests(newQuests.map((q) => q.id).toList());
 
         // Also refresh items?
-        ref.refresh(shopItemsProvider);
+        ref.invalidate(shopItemsProvider);
       }
     }
   }
@@ -338,7 +338,7 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                   ref
                       .read(gameProvider.notifier)
                       .updateShopQuests(newQuests.map((q) => q.id).toList());
-                  ref.refresh(shopItemsProvider);
+                  ref.invalidate(shopItemsProvider);
                 },
                 child: const Text("Refresh Stock (Debug)"),
               ),
