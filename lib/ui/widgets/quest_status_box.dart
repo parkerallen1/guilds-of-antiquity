@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/hero_model.dart';
 import '../../providers/quest_provider.dart';
+import 'retro_widgets.dart';
 
 class QuestStatusBox extends ConsumerStatefulWidget {
   final HeroModel hero;
@@ -120,50 +121,40 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
     final timeStr =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    return Container(
+    return RetroPanel(
       width: 200,
+      backgroundColor: Colors.black.withValues(alpha: 0.8),
+      borderWidth: 2,
+      bevelWidth: 2,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             "QUEST IN PROGRESS",
-            style: GoogleFonts.cinzel(
+            style: GoogleFonts.vt323(
               color: Colors.amber,
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             timeStr,
-            style: const TextStyle(
+            style: GoogleFonts.vt323(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Courier', // Monospace for timer
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            _currentLore,
+            _currentLore.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: GoogleFonts.pixelifySans(
               color: Colors.white70,
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
+              fontSize: 10,
             ),
           ),
         ],
@@ -172,76 +163,64 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
   }
 
   Widget _buildResultStatus(QuestResult result) {
-    return Container(
+    return RetroPanel(
       width: 200,
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
+      borderWidth: 2,
+      bevelWidth: 2,
+      outlineColor: Colors.black,
+      highlightColor: result.success ? Colors.green.withValues(alpha: 0.5) : Colors.red.withValues(alpha: 0.5),
+      shadowColor: Colors.black,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: result.success ? Colors.green : Colors.red,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (result.success ? Colors.green : Colors.red).withValues(alpha: 
-              0.2,
-            ),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             result.success ? "VICTORY!" : "DEFEAT",
-            style: GoogleFonts.cinzel(
+            style: GoogleFonts.vt323(
               color: result.success ? Colors.green : Colors.red,
-              fontSize: 16,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            result.questTitle,
+            result.questTitle.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: GoogleFonts.pixelifySans(color: Colors.white, fontSize: 10),
           ),
           const SizedBox(height: 8),
           if (result.success) ...[
             _buildRewardRow(
               FontAwesomeIcons.coins,
-              "${result.goldGained} Gold",
+              "${result.goldGained} GOLD",
               Colors.amber,
             ),
             _buildRewardRow(
               FontAwesomeIcons.star,
               "${result.xpGained} XP",
-              Colors.blue,
+              Colors.blueAccent,
             ),
             if (result.itemsGained.isNotEmpty)
               ...result.itemsGained.map(
                 (item) => _buildRewardRow(
                   FontAwesomeIcons.gem,
-                  item,
+                  item.toUpperCase(),
                   Colors.purpleAccent,
                 ),
               ),
           ] else
-            const Text(
-              "Better luck next time...",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            Text(
+              "BETTER LUCK NEXT TIME...",
+              style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 10),
             ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
-                padding: const EdgeInsets.symmetric(vertical: 8),
-              ),
+            child: RetroButton(
+              backgroundColor: Colors.grey[800],
+              padding: const EdgeInsets.symmetric(vertical: 8),
               onPressed: () {
                 ref.read(questResultProvider.notifier).update((state) {
                   final newState = Map<String, QuestResult>.from(state);
@@ -249,9 +228,11 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
                   return newState;
                 });
               },
-              child: const Text(
-                "Dismiss",
-                style: TextStyle(color: Colors.white),
+              child: Center(
+                child: Text(
+                  "DISMISS",
+                  style: GoogleFonts.vt323(color: Colors.white, fontSize: 16),
+                ),
               ),
             ),
           ),
@@ -266,13 +247,13 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 12, color: color),
+          Icon(icon, size: 10, color: color),
           const SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(
+            style: GoogleFonts.pixelifySans(
               color: color,
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
           ),

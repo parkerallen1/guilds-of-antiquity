@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/business_model.dart';
 import '../../providers/game_provider.dart';
+import 'retro_widgets.dart';
 
 class BusinessSelectionView extends ConsumerStatefulWidget {
   const BusinessSelectionView({super.key});
@@ -24,22 +25,23 @@ class _BusinessSelectionViewState extends ConsumerState<BusinessSelectionView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            _selectedType == null
-                ? "Choose Your Enterprise"
-                : "Select Initial Upgrade",
-            style: GoogleFonts.cinzel(
+            (_selectedType == null
+                ? "CHOOSE YOUR ENTERPRISE"
+                : "SELECT INITIAL UPGRADE").toUpperCase(),
+            style: GoogleFonts.vt323(
               color: Colors.amber,
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            _selectedType == null
+            (_selectedType == null
                 ? "Select a business to manage for this Era."
-                : "Choose a specialization for your ${_getBusinessName(_selectedType!)}.",
-            style: const TextStyle(color: Colors.grey),
+                : "Choose a specialization for your ${_getBusinessName(_selectedType!)}.").toUpperCase(),
+            style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 12),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -97,43 +99,45 @@ class _BusinessSelectionViewState extends ConsumerState<BusinessSelectionView> {
     String title,
     String description,
   ) {
-    return Card(
-      color: Colors.grey[850],
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedType = type;
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(icon, size: 40, color: Colors.amber),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.cinzel(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedType = type;
+        });
+      },
+      child: RetroPanel(
+        backgroundColor: Colors.grey[850],
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 36, color: Colors.amber),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title.toUpperCase(),
+                    style: GoogleFonts.vt323(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: const TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description.toUpperCase(),
+                    style: GoogleFonts.pixelifySans(
+                      color: Colors.grey[400],
+                      fontSize: 11,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-            ],
-          ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+          ],
         ),
       ),
     );
@@ -152,13 +156,19 @@ class _BusinessSelectionViewState extends ConsumerState<BusinessSelectionView> {
             ],
           ),
         ),
-        TextButton(
+        const SizedBox(height: 16),
+        RetroButton(
+          backgroundColor: Colors.grey[800]!,
           onPressed: () {
             setState(() {
               _selectedType = null;
             });
           },
-          child: const Text("Back", style: TextStyle(color: Colors.grey)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Text(
+            "BACK",
+            style: GoogleFonts.vt323(color: Colors.white, fontSize: 16, letterSpacing: 1.0),
+          ),
         ),
       ],
     );
@@ -176,32 +186,34 @@ class _BusinessSelectionViewState extends ConsumerState<BusinessSelectionView> {
   }
 
   Widget _buildUpgradeCard(BusinessUpgrade upgrade) {
-    return Card(
-      color: Colors.grey[850],
-      child: InkWell(
-        onTap: () {
-          _confirmSelection(upgrade);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _getUpgradeName(upgrade),
-                style: GoogleFonts.cinzel(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+    return GestureDetector(
+      onTap: () {
+        _confirmSelection(upgrade);
+      },
+      child: RetroPanel(
+        backgroundColor: Colors.grey[850],
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _getUpgradeName(upgrade).toUpperCase(),
+              style: GoogleFonts.vt323(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
               ),
-              const SizedBox(height: 8),
-              Text(
-                _getUpgradeDescription(upgrade),
-                style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _getUpgradeDescription(upgrade).toUpperCase(),
+              style: GoogleFonts.pixelifySans(
+                color: Colors.grey[400],
+                fontSize: 12,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

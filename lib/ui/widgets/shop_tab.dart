@@ -9,6 +9,7 @@ import '../../models/item_model.dart';
 import '../../models/quest_model.dart';
 import '../../utils/loot_factory.dart';
 import '../../services/quest_service.dart';
+import 'retro_widgets.dart';
 
 // Simple provider to hold shop items for the day
 final shopItemsProvider = StateProvider<List<Item>>((ref) {
@@ -73,11 +74,11 @@ class _ShopTabState extends ConsumerState<ShopTab> {
             children: [
               Text(
                 "THE MERCHANT",
-                style: GoogleFonts.cinzel(color: Colors.amber, fontSize: 20),
+                style: GoogleFonts.vt323(color: Colors.amber, fontSize: 26, letterSpacing: 1.5),
               ),
               Text(
-                "Refreshes every 3h",
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                "REFRESHES EVERY 3H",
+                style: GoogleFonts.pixelifySans(color: Colors.grey[500], fontSize: 11),
               ),
             ],
           ),
@@ -93,51 +94,54 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                   ),
                   child: Text(
                     "CONTRACTS",
-                    style: GoogleFonts.cinzel(color: Colors.white70),
+                    style: GoogleFonts.vt323(color: Colors.white70, fontSize: 20, letterSpacing: 1.0),
                   ),
                 ),
                 ...shopQuests.map((quest) {
                   final isPurchased = gameState.discoveredSideQuestIds.contains(
                     quest.id,
                   );
-                  return Card(
-                    color: Colors.grey[900],
+                  return RetroPanel(
+                    backgroundColor: Colors.grey[900],
+                    borderWidth: 2,
+                    bevelWidth: 2,
+                    outlineColor: Colors.black,
                     margin: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 4,
                     ),
+                    padding: EdgeInsets.zero,
                     child: ListTile(
                       leading: const Icon(
                         FontAwesomeIcons.scroll,
                         color: Colors.amber,
                       ),
                       title: Text(
-                        quest.title,
-                        style: GoogleFonts.cinzel(color: Colors.white),
+                        quest.title.toUpperCase(),
+                        style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
                       ),
                       subtitle: Text(
-                        "Lvl ${quest.difficulty} Side Quest",
-                        style: TextStyle(color: Colors.grey[400]),
+                        "LVL ${quest.difficulty} SIDE QUEST",
+                        style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
                       ),
                       trailing: isPurchased
                           ? const Icon(
                               FontAwesomeIcons.check,
                               color: Colors.green,
                             )
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber,
-                              ),
+                          : RetroButton(
+                              backgroundColor: Colors.amber,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               onPressed: () => _buyQuest(quest, gameState.gold),
                               child: Text(
                                 "${quest.difficulty * 10} G",
-                                style: const TextStyle(color: Colors.black),
+                                style: GoogleFonts.vt323(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                             ),
                     ),
                   );
                 }),
-                const Divider(color: Colors.grey),
+                const RetroDivider(color: Colors.black, height: 16, thickness: 2),
               ],
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -146,38 +150,41 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                 ),
                 child: Text(
                   "CONSUMABLES",
-                  style: GoogleFonts.cinzel(color: Colors.white70),
+                  style: GoogleFonts.vt323(color: Colors.white70, fontSize: 20, letterSpacing: 1.0),
                 ),
               ),
-              Card(
-                color: Colors.grey[900],
+              RetroPanel(
+                backgroundColor: Colors.grey[900],
+                borderWidth: 2,
+                bevelWidth: 2,
+                outlineColor: Colors.black,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   leading: const Icon(
                     FontAwesomeIcons.flask,
                     color: Colors.redAccent,
                   ),
                   title: Text(
-                    "Health Potion",
-                    style: GoogleFonts.cinzel(color: Colors.white),
+                    "HEALTH POTION",
+                    style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
                   ),
                   subtitle: Text(
-                    "Restores 50 HP.",
-                    style: TextStyle(color: Colors.grey[400]),
+                    "RESTORES 50 HP.",
+                    style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
                   ),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                    ),
+                  trailing: RetroButton(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     onPressed: () => _buyPotion(context, ref, gameState),
-                    child: const Text(
+                    child: Text(
                       "50 G",
-                      style: TextStyle(color: Colors.white),
+                      style: GoogleFonts.vt323(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ),
               ),
-              const Divider(color: Colors.grey),
+              const RetroDivider(color: Colors.black, height: 16, thickness: 2),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -185,68 +192,74 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                 ),
                 child: Text(
                   "UPGRADES",
-                  style: GoogleFonts.cinzel(color: Colors.white70),
+                  style: GoogleFonts.vt323(color: Colors.white70, fontSize: 20, letterSpacing: 1.0),
                 ),
               ),
-              Card(
-                color: Colors.grey[900],
+              RetroPanel(
+                backgroundColor: Colors.grey[900],
+                borderWidth: 2,
+                bevelWidth: 2,
+                outlineColor: Colors.black,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   leading: const Icon(
                     FontAwesomeIcons.sackDollar,
                     color: Colors.amber,
                   ),
                   title: Text(
-                    "Bag Upgrade (+5 Slots)",
-                    style: GoogleFonts.cinzel(color: Colors.white),
+                    "BAG UPGRADE (+5 SLOTS)",
+                    style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
                   ),
                   subtitle: Text(
-                    "Current Limit: ${gameState.inventoryLimit}",
-                    style: TextStyle(color: Colors.grey[400]),
+                    "CURRENT LIMIT: ${gameState.inventoryLimit}",
+                    style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
                   ),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
-                    ),
+                  trailing: RetroButton(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     onPressed: () => _buyBagUpgrade(context, ref, gameState),
                     child: Text(
                       "${(gameState.inventoryLimit - 15) * 100} G",
-                      style: const TextStyle(color: Colors.black),
+                      style: GoogleFonts.vt323(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ),
               ),
-              const Divider(color: Colors.grey),
-              Card(
-                color: Colors.grey[900],
+              const RetroDivider(color: Colors.black, height: 16, thickness: 2),
+              RetroPanel(
+                backgroundColor: Colors.grey[900],
+                borderWidth: 2,
+                bevelWidth: 2,
+                outlineColor: Colors.black,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   leading: const Icon(
                     FontAwesomeIcons.gem,
                     color: Colors.purpleAccent,
                   ),
                   title: Text(
-                    "Mysterious Shard",
-                    style: GoogleFonts.cinzel(color: Colors.white),
+                    "MYSTERIOUS SHARD",
+                    style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
                   ),
                   subtitle: Text(
-                    "Contains a hint for a Legendary Quest.",
-                    style: TextStyle(color: Colors.grey[400]),
+                    "CONTAINS A HINT FOR A LEGENDARY QUEST.",
+                    style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
                   ),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                    ),
+                  trailing: RetroButton(
+                    backgroundColor: Colors.purple[600]!,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     onPressed: () =>
                         _buyShard(context, ref, gameState, questService),
-                    child: const Text(
+                    child: Text(
                       "500 G",
-                      style: TextStyle(color: Colors.white),
+                      style: GoogleFonts.vt323(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ),
               ),
-              const Divider(color: Colors.grey),
+              const RetroDivider(color: Colors.black, height: 16, thickness: 2),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -254,56 +267,58 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                 ),
                 child: Text(
                   "EQUIPMENT",
-                  style: GoogleFonts.cinzel(color: Colors.white70),
+                  style: GoogleFonts.vt323(color: Colors.white70, fontSize: 20, letterSpacing: 1.0),
                 ),
               ),
               ...shopItems.map((item) {
-                return Card(
-                  color: Colors.grey[900],
+                return RetroPanel(
+                  backgroundColor: Colors.grey[900],
+                  borderWidth: 2,
+                  bevelWidth: 2,
+                  outlineColor: Colors.black,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 4,
                   ),
+                  padding: EdgeInsets.zero,
                   child: ListTile(
-                    leading: Container(
+                    leading: RetroPanel(
                       width: 50,
                       height: 50,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: _getRarityColor(item.rarity)),
-                        borderRadius: BorderRadius.circular(4),
-                        image: item.imagePath != null
-                            ? DecorationImage(
-                                image: AssetImage(item.imagePath!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ),
-                      child: item.imagePath == null
-                          ? Icon(
+                      padding: const EdgeInsets.all(4),
+                      backgroundColor: Colors.black54,
+                      borderWidth: 1.5,
+                      bevelWidth: 1.5,
+                      outlineColor: Colors.black,
+                      highlightColor: _getRarityColor(item.rarity).withValues(alpha: 0.3),
+                      child: item.imagePath != null
+                          ? Image.asset(
+                              item.imagePath!,
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(
                               _getIconForSlot(item.slot),
                               color: _getRarityColor(item.rarity),
-                            )
-                          : null,
+                              size: 20,
+                            ),
                     ),
                     title: Text(
-                      item.name,
-                      style: GoogleFonts.cinzel(color: Colors.white),
+                      item.name.toUpperCase(),
+                      style: GoogleFonts.vt323(color: _getRarityColor(item.rarity), fontSize: 18),
                     ),
                     subtitle: Text(
-                      "${item.rarity.name.toUpperCase()} - ${item.value} Gold",
-                      style: TextStyle(color: Colors.grey[400]),
+                      "${item.rarity.name.toUpperCase()} - ${item.value} GOLD",
+                      style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
                     ),
-                    trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                      ),
+                    trailing: RetroButton(
+                      backgroundColor: Colors.amber,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       onPressed: () {
                         _buyItem(context, ref, item, gameState.gold);
                       },
-                      child: const Text(
+                      child: Text(
                         "BUY",
-                        style: TextStyle(color: Colors.black),
+                        style: GoogleFonts.vt323(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ),
                   ),
@@ -312,27 +327,34 @@ class _ShopTabState extends ConsumerState<ShopTab> {
             ],
           ),
         ),
-        Container(
+        RetroPanel(
           padding: const EdgeInsets.all(16),
-          color: Colors.black54,
+          backgroundColor: const Color(0xFF0D0D0D),
+          borderWidth: 3,
+          bevelWidth: 3,
+          outlineColor: Colors.black,
+          highlightColor: Colors.amber.withValues(alpha: 0.2),
           child: Row(
             children: [
               const Icon(FontAwesomeIcons.coins, color: Colors.amber),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Text(
-                "${gameState.gold} Gold",
-                style: GoogleFonts.cinzel(color: Colors.white, fontSize: 18),
+                "${gameState.gold} GOLD",
+                style: GoogleFonts.vt323(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
-              TextButton(
+              RetroButton(
+                backgroundColor: Colors.grey[850]!,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                borderWidth: 1.5,
+                bevelWidth: 1.5,
                 onPressed: () {
                   // Force Refresh (Debug)
                   ref
                       .read(gameProvider.notifier)
                       .updateShopQuests(
                         [],
-                      ); // Clear to force refresh logic next check?
-                  // Or just call check
+                      );
                   final questService = ref.read(questServiceProvider);
                   final newQuests = questService.getRandomSideQuests(3);
                   ref
@@ -340,7 +362,10 @@ class _ShopTabState extends ConsumerState<ShopTab> {
                       .updateShopQuests(newQuests.map((q) => q.id).toList());
                   ref.invalidate(shopItemsProvider);
                 },
-                child: const Text("Refresh Stock (Debug)"),
+                child: Text(
+                  "REFRESH (DEBUG)",
+                  style: GoogleFonts.vt323(color: Colors.grey[400], fontSize: 14),
+                ),
               ),
             ],
           ),

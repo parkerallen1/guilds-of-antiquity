@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/business_model.dart';
 import '../../providers/game_provider.dart';
 import '../../services/ticker_service.dart'; // For tick provider
+import 'retro_widgets.dart';
 
 class BusinessDashboardView extends ConsumerStatefulWidget {
   final Business business;
@@ -38,44 +39,52 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header Card
-          Card(
-            color: Colors.grey[900],
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  Icon(_getIcon(business.type), size: 64, color: Colors.amber),
-                  const SizedBox(height: 16),
-                  Text(
-                    business.name,
-                    style: GoogleFonts.cinzel(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+          RetroPanel(
+            backgroundColor: Colors.grey[900],
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                Icon(_getIcon(business.type), size: 64, color: Colors.amber),
+                const SizedBox(height: 16),
+                Text(
+                  business.name.toUpperCase(),
+                  style: GoogleFonts.vt323(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
                   ),
-                  Text(
-                    business.description,
-                    style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  business.description.toUpperCase(),
+                  style: GoogleFonts.pixelifySans(
+                    color: Colors.grey[400],
+                    fontSize: 13,
                   ),
-                  const SizedBox(height: 24),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
 
-                  // State-based UI
-                  if (isFinished)
-                    _buildFinishedState(context, ref, business)
-                  else if (isProducing)
-                    _buildProducingState(context, ref, business, now)
-                  else
-                    _buildIdleState(context, ref, business),
-                ],
-              ),
+                // State-based UI
+                if (isFinished)
+                  _buildFinishedState(context, ref, business)
+                else if (isProducing)
+                  _buildProducingState(context, ref, business, now)
+                else
+                  _buildIdleState(context, ref, business),
+              ],
             ),
           ),
 
           const SizedBox(height: 24),
           Text(
-            "Management",
-            style: GoogleFonts.cinzel(color: Colors.white, fontSize: 20),
+            "MANAGEMENT",
+            style: GoogleFonts.vt323(
+              color: Colors.amber,
+              fontSize: 24,
+              letterSpacing: 1.5,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -120,17 +129,22 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
   ) {
     return Column(
       children: [
-        const Text(
-          "Select Duration",
-          style: TextStyle(color: Colors.white, fontSize: 18),
+        Text(
+          "SELECT DURATION",
+          style: GoogleFonts.vt323(
+            color: Colors.white,
+            fontSize: 20,
+            letterSpacing: 1.0,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
-          "${_selectedDurationHours.toInt()} Hours",
-          style: const TextStyle(
+          "${_selectedDurationHours.toInt()} HOURS",
+          style: GoogleFonts.vt323(
             color: Colors.amber,
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
           ),
         ),
         Slider(
@@ -148,27 +162,25 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
         ),
         const SizedBox(height: 16),
         Text(
-          _getEstimateText(business, _selectedDurationHours.toInt()),
+          _getEstimateText(business, _selectedDurationHours.toInt()).toUpperCase(),
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.grey),
+          style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 12),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amber,
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-          ),
+        RetroButton(
+          backgroundColor: Colors.amber,
           onPressed: () {
             ref
                 .read(gameProvider.notifier)
                 .startBusinessProduction((_selectedDurationHours * 60).toInt());
           },
-          child: const Text(
-            "Start Production",
-            style: TextStyle(
+          child: Text(
+            "START PRODUCTION",
+            style: GoogleFonts.vt323(
               color: Colors.black,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
         ),
@@ -195,21 +207,31 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
 
     return Column(
       children: [
-        const Text(
-          "Production in Progress",
-          style: TextStyle(color: Colors.amber, fontSize: 18),
+        Text(
+          "PRODUCTION IN PROGRESS",
+          style: GoogleFonts.vt323(
+            color: Colors.amber,
+            fontSize: 20,
+            letterSpacing: 1.0,
+          ),
         ),
         const SizedBox(height: 16),
-        LinearProgressIndicator(
+        RetroProgressBar(
           value: progress,
-          backgroundColor: Colors.grey[800],
-          valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-          minHeight: 12,
+          progressColor: Colors.amber,
+          backgroundColor: const Color(0xFF0D0D0D),
+          height: 18,
+          segmented: true,
+          segments: 15,
         ),
         const SizedBox(height: 8),
         Text(
-          "Time Remaining: ${_formatDuration(remaining)}",
-          style: const TextStyle(color: Colors.white),
+          "TIME REMAINING: ${_formatDuration(remaining)}",
+          style: GoogleFonts.vt323(
+            color: Colors.white,
+            fontSize: 16,
+            letterSpacing: 1.0,
+          ),
         ),
       ],
     );
@@ -222,29 +244,28 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
   ) {
     return Column(
       children: [
-        const Text(
-          "Production Complete!",
-          style: TextStyle(
-            color: Colors.green,
-            fontSize: 20,
+        Text(
+          "PRODUCTION COMPLETE!",
+          style: GoogleFonts.vt323(
+            color: Colors.greenAccent,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
           ),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-          ),
+        RetroButton(
+          backgroundColor: Colors.green[700]!,
           onPressed: () {
             ref.read(gameProvider.notifier).claimBusinessReward(DateTime.now());
           },
-          child: const Text(
-            "Claim Rewards",
-            style: TextStyle(
+          child: Text(
+            "CLAIM REWARDS",
+            style: GoogleFonts.vt323(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
             ),
           ),
         ),
@@ -297,60 +318,75 @@ class _BusinessDashboardViewState extends ConsumerState<BusinessDashboardView> {
     final gameState = ref.watch(gameProvider);
     final canAfford = gameState.gold >= cost;
 
-    return Card(
-      color: Colors.grey[850],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: Colors.blueAccent),
+    return RetroPanel(
+      backgroundColor: Colors.grey[850],
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        children: [
+          RetroPanel(
+            backgroundColor: Colors.grey[900],
+            padding: const EdgeInsets.all(8),
+            width: 48,
+            height: 48,
+            borderWidth: 1.5,
+            bevelWidth: 1.5,
+            child: Center(
+              child: Icon(icon, color: Colors.cyanAccent, size: 20),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: GoogleFonts.vt323(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    letterSpacing: 1.0,
                   ),
-                  Text(
-                    "Level $currentLevel",
-                    style: const TextStyle(color: Colors.blueAccent),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ],
-              ),
+                ),
+                Text(
+                  "LEVEL $currentLevel",
+                  style: GoogleFonts.vt323(color: Colors.cyanAccent, fontSize: 14),
+                ),
+                Text(
+                  subtitle.toUpperCase(),
+                  style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 11),
+                ),
+              ],
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: canAfford ? Colors.green : Colors.grey,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: canAfford ? onUpgrade : null,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Upgrade"),
-                  Text("$cost G", style: const TextStyle(fontSize: 12)),
-                ],
-              ),
+          ),
+          const SizedBox(width: 8),
+          RetroButton(
+            backgroundColor: canAfford ? Colors.green[700]! : Colors.grey[700]!,
+            enabled: canAfford,
+            onPressed: canAfford ? onUpgrade : null,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "UPGRADE",
+                  style: GoogleFonts.vt323(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "$cost G",
+                  style: GoogleFonts.vt323(
+                    color: canAfford ? Colors.amberAccent : Colors.grey[300],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import '../../models/hero_model.dart';
 import '../../models/item_model.dart';
 import '../../providers/hero_provider.dart';
 import '../../providers/game_provider.dart';
+import 'retro_widgets.dart';
 
 class HeroDetailSheet extends ConsumerWidget {
   final HeroModel hero;
@@ -21,13 +22,12 @@ class HeroDetailSheet extends ConsumerWidget {
       orElse: () => hero,
     );
 
-    return Container(
+    return RetroPanel(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
-      ),
+      backgroundColor: const Color(0xFF1E1E1E),
+      borderWidth: 3,
+      bevelWidth: 3,
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           const SizedBox(height: 16),
@@ -38,24 +38,28 @@ class HeroDetailSheet extends ConsumerWidget {
               if (currentHero.imagePath != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage(currentHero.imagePath!),
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: Image.asset(currentHero.imagePath!, fit: BoxFit.cover),
                   ),
                 ),
               Column(
                 children: [
                   Text(
-                    currentHero.name,
-                    style: GoogleFonts.cinzel(
+                    currentHero.name.toUpperCase(),
+                    style: GoogleFonts.vt323(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "Level ${currentHero.level} ${currentHero.classType}",
-                    style: GoogleFonts.lato(color: Colors.grey),
+                    "LEVEL ${currentHero.level} ${currentHero.classType.toUpperCase()}",
+                    style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
                   ),
                 ],
               ),
@@ -69,12 +73,12 @@ class HeroDetailSheet extends ConsumerWidget {
               size: 16,
               color: Colors.redAccent,
             ),
-            label: const Text(
-              "Dismiss Hero",
-              style: TextStyle(color: Colors.redAccent),
+            label: Text(
+              "DISMISS HERO",
+              style: GoogleFonts.vt323(color: Colors.redAccent, fontSize: 16),
             ),
           ),
-          const Divider(color: Colors.grey),
+          const RetroDivider(color: Colors.black, height: 16, thickness: 2),
 
           // Paper Doll & Stats
           Expanded(
@@ -137,10 +141,11 @@ class HeroDetailSheet extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Text(
-                            "Points: ${currentHero.upgradePoints}",
-                            style: const TextStyle(
+                            "POINTS: ${currentHero.upgradePoints}",
+                            style: GoogleFonts.vt323(
                               color: Colors.amber,
                               fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
                           ),
                         ),
@@ -184,28 +189,29 @@ class HeroDetailSheet extends ConsumerWidget {
             ),
           ),
 
-          const Divider(color: Colors.grey),
+          const RetroDivider(color: Colors.black, height: 16, thickness: 2),
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Align(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "INVENTORY",
-                    style: GoogleFonts.cinzel(color: Colors.amber),
+                    style: GoogleFonts.vt323(color: Colors.amber, fontSize: 22, letterSpacing: 1.0),
                   ),
                   Consumer(
                     builder: (context, ref, child) {
                       final gameState = ref.watch(gameProvider);
                       return Text(
                         "${gameState.inventory.length}/${gameState.inventoryLimit}",
-                        style: TextStyle(
+                        style: GoogleFonts.pixelifySans(
                           color:
                               gameState.inventory.length >=
                                   gameState.inventoryLimit
                               ? Colors.red
                               : Colors.grey,
+                          fontSize: 14,
                         ),
                       );
                     },
@@ -240,88 +246,95 @@ class HeroDetailSheet extends ConsumerWidget {
                     final item = inventory[index];
                     return GestureDetector(
                       onTap: () => _equipItem(ref, currentHero, item),
-                      child: Container(
+                      child: RetroPanel(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[850],
-                          border: Border.all(
-                            color: _getRarityColor(item.rarity),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        backgroundColor: Colors.grey[900],
+                        borderWidth: 2,
+                        bevelWidth: 2,
+                        outlineColor: Colors.black,
+                        highlightColor: _getRarityColor(item.rarity).withValues(alpha: 0.3),
+                        shadowColor: Colors.black54,
                         child: Row(
                           children: [
                             // Icon/Image
-                            Container(
+                            RetroPanel(
                               width: 48,
                               height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(4),
-                                image: item.imagePath != null
-                                    ? DecorationImage(
-                                        image: AssetImage(item.imagePath!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
-                              ),
+                              padding: EdgeInsets.zero,
+                              backgroundColor: Colors.black54,
+                              borderWidth: 1.5,
+                              bevelWidth: 1.5,
+                              outlineColor: Colors.black,
+                              highlightColor: _getRarityColor(item.rarity).withValues(alpha: 0.3),
                               child: Center(
-                                child: item.imagePath == null
-                                    ? Icon(
+                                child: item.imagePath != null
+                                    ? Image.asset(
+                                        item.imagePath!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      )
+                                    : Icon(
                                         _getIconForSlot(item.slot),
                                         color: _getRarityColor(item.rarity),
-                                        size: 24,
-                                      )
-                                    : null,
+                                        size: 20,
+                                      ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 12),
                             // Name and Stats
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.name,
-                                    style: GoogleFonts.cinzel(
+                                    item.name.toUpperCase(),
+                                    style: GoogleFonts.vt323(
                                       color: _getRarityColor(item.rarity),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
+                                      height: 1.0,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    _buildStatString(item),
-                                    style: GoogleFonts.lato(
+                                    _buildStatString(item).toUpperCase(),
+                                    style: GoogleFonts.pixelifySans(
                                       color: Colors.grey[400],
-                                      fontSize: 14,
+                                      fontSize: 11,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            // Equip Hint
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            // Action buttons
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.add_circle_outline,
-                                    color: Colors.green,
+                                RetroButton(
+                                  backgroundColor: Colors.green[700]!,
+                                  padding: const EdgeInsets.all(8),
+                                  borderWidth: 1.5,
+                                  bevelWidth: 1.5,
+                                  onPressed: () => _equipItem(ref, currentHero, item),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 14,
                                   ),
-                                  onPressed: () =>
-                                      _equipItem(ref, currentHero, item),
-                                  tooltip: "Equip",
                                 ),
-                                IconButton(
-                                  icon: const Icon(
+                                const SizedBox(width: 6),
+                                RetroButton(
+                                  backgroundColor: Colors.amber[700]!,
+                                  padding: const EdgeInsets.all(8),
+                                  borderWidth: 1.5,
+                                  bevelWidth: 1.5,
+                                  onPressed: () => _sellItem(context, ref, item),
+                                  child: const Icon(
                                     FontAwesomeIcons.coins,
-                                    color: Colors.amber,
-                                    size: 16,
+                                    color: Colors.black,
+                                    size: 12,
                                   ),
-                                  onPressed: () =>
-                                      _sellItem(context, ref, item),
-                                  tooltip: "Sell",
                                 ),
                               ],
                             ),
@@ -346,36 +359,35 @@ class HeroDetailSheet extends ConsumerWidget {
     ItemSlot slot,
     Item? item,
   ) {
+    final color = item != null
+        ? _getRarityColor(item.rarity)
+        : Colors.grey.withValues(alpha: 0.3);
+
     return GestureDetector(
       onTap: item != null ? () => _unequipItem(ref, hero, item) : null,
-      child: Container(
+      child: RetroPanel(
         width: 60,
         height: 60,
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          border: Border.all(
-            color: item != null
-                ? _getRarityColor(item.rarity)
-                : Colors.grey.withValues(alpha: 0.3),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          image: item?.imagePath != null
-              ? DecorationImage(
-                  image: AssetImage(item!.imagePath!),
-                  fit: BoxFit.cover,
-                )
-              : null,
-        ),
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.black54,
+        borderWidth: 2,
+        bevelWidth: 2,
+        outlineColor: Colors.black,
+        highlightColor: color.withValues(alpha: 0.4),
+        shadowColor: Colors.black,
         child: Center(
-          child: item?.imagePath == null
-              ? Icon(
-                  _getIconForSlot(slot),
-                  color: item != null
-                      ? _getRarityColor(item.rarity)
-                      : Colors.grey.withValues(alpha: 0.3),
+          child: item?.imagePath != null
+              ? Image.asset(
+                  item!.imagePath!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
                 )
-              : null,
+              : Icon(
+                  _getIconForSlot(slot),
+                  color: color,
+                  size: 20,
+                ),
         ),
       ),
     );
@@ -394,34 +406,34 @@ class HeroDetailSheet extends ConsumerWidget {
         children: [
           SizedBox(
             width: 50,
-            child: Text("$label: ", style: const TextStyle(color: Colors.grey)),
+            child: Text(
+              "$label: ",
+              style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 13),
+            ),
           ),
           Text(
             "$total",
-            style: const TextStyle(
+            style: GoogleFonts.pixelifySans(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 14,
             ),
           ),
           if (bonus > 0)
             Text(
               " (+$bonus)",
-              style: const TextStyle(color: Colors.green, fontSize: 12),
+              style: GoogleFonts.pixelifySans(color: Colors.green, fontSize: 11),
             ),
           if (onUpgrade != null)
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: InkWell(
-                onTap: onUpgrade,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Icon(Icons.add, size: 12, color: Colors.black),
-                ),
+              child: RetroButton(
+                backgroundColor: Colors.amber,
+                padding: const EdgeInsets.all(4),
+                borderWidth: 1,
+                bevelWidth: 1,
+                onPressed: onUpgrade,
+                child: const Icon(Icons.add, size: 10, color: Colors.black),
               ),
             ),
         ],
@@ -592,19 +604,18 @@ class HeroDetailSheet extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
         title: Text(
-          "Dismiss ${hero.name}?",
-          style: GoogleFonts.cinzel(color: Colors.white),
+          "DISMISS ${hero.name.toUpperCase()}?",
+          style: GoogleFonts.vt323(color: Colors.white, fontSize: 24),
         ),
-        content: const Text(
-          "Are you sure you want to dismiss this hero? This action cannot be undone.",
-          style: TextStyle(color: Colors.grey),
+        content: Text(
+          "ARE YOU SURE YOU WANT TO DISMISS THIS HERO? THIS ACTION CANNOT BE UNDONE.",
+          style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text("CANCEL", style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18)),
           ),
           TextButton(
             onPressed: () {
@@ -612,9 +623,9 @@ class HeroDetailSheet extends ConsumerWidget {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close sheet
             },
-            child: const Text(
-              "Dismiss",
-              style: TextStyle(color: Colors.redAccent),
+            child: Text(
+              "DISMISS",
+              style: GoogleFonts.vt323(color: Colors.redAccent, fontSize: 18),
             ),
           ),
         ],
@@ -635,26 +646,25 @@ class HeroDetailSheet extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
         title: Text(
-          "Sell ${item.name}?",
-          style: GoogleFonts.cinzel(color: Colors.white),
+          "SELL ${item.name.toUpperCase()}?",
+          style: GoogleFonts.vt323(color: Colors.white, fontSize: 24),
         ),
         content: Text(
-          "Sell this item for ${10 + (item.rarity.index * 10)} Gold?",
-          style: const TextStyle(color: Colors.grey),
+          "SELL THIS ITEM FOR ${10 + (item.rarity.index * 10)} GOLD?",
+          style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text("CANCEL", style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18)),
           ),
           TextButton(
             onPressed: () {
               ref.read(gameProvider.notifier).sellItem(item);
               Navigator.pop(context);
             },
-            child: const Text("Sell", style: TextStyle(color: Colors.amber)),
+            child: Text("SELL", style: GoogleFonts.vt323(color: Colors.amber, fontSize: 18)),
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../providers/hero_provider.dart';
 import '../../models/hero_model.dart';
 import '../../utils/text_gen.dart';
+import '../widgets/retro_widgets.dart';
 
 class HeroCreationScreen extends ConsumerStatefulWidget {
   const HeroCreationScreen({super.key});
@@ -163,31 +164,46 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF222222),
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text("Create Your Hero", style: GoogleFonts.cinzel()),
+        title: Text("CREATE YOUR HERO", style: GoogleFonts.vt323(fontSize: 28)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Portrait Selection
+            // Portrait Selection (Square Retro Frame)
             Center(
               child: GestureDetector(
                 onTap: _pickRandomPortrait,
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage(_selectedPortrait),
-                  child: const Align(
-                    alignment: Alignment.bottomRight,
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.amber,
-                      child: Icon(Icons.refresh, size: 16, color: Colors.black),
-                    ),
+                child: RetroPanel(
+                  width: 140,
+                  height: 140,
+                  padding: EdgeInsets.zero,
+                  backgroundColor: const Color(0xFF0D0D0D),
+                  borderWidth: 3,
+                  bevelWidth: 3,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          _selectedPortrait,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          color: Colors.amber,
+                          child: const Icon(Icons.refresh, size: 18, color: Colors.black),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -200,27 +216,21 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
                 Expanded(
                   child: TextField(
                     controller: _nameController,
-                    style: GoogleFonts.cinzel(
+                    style: GoogleFonts.pixelifySans(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 16,
                     ),
                     decoration: const InputDecoration(
-                      labelText: "Hero Name",
-                      labelStyle: TextStyle(color: Colors.grey),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.amber),
-                      ),
+                      labelText: "HERO NAME",
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(FontAwesomeIcons.dice, color: Colors.amber),
+                RetroButton(
+                  padding: const EdgeInsets.all(12),
+                  backgroundColor: Colors.amber,
                   onPressed: _generateName,
-                  tooltip: "Random Name",
+                  child: const Icon(FontAwesomeIcons.dice, color: Colors.black),
                 ),
               ],
             ),
@@ -229,20 +239,19 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
             // Class Selection
             DropdownButtonFormField<String>(
               initialValue: _selectedClass,
-              dropdownColor: Colors.grey[850],
-              style: GoogleFonts.cinzel(color: Colors.white),
+              dropdownColor: Colors.grey[900],
+              style: GoogleFonts.pixelifySans(color: Colors.white, fontSize: 16),
               decoration: const InputDecoration(
-                labelText: "Class",
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.amber),
-                ),
+                labelText: "CLASS",
               ),
               items: _classes
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                  .map((c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(
+                          c.toUpperCase(),
+                          style: GoogleFonts.vt323(fontSize: 18),
+                        ),
+                      ))
                   .toList(),
               onChanged: (val) => setState(() {
                 _selectedClass = val!;
@@ -252,63 +261,73 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 4),
               child: Text(
-                _getClassDescription(_selectedClass),
-                style: const TextStyle(
+                _getClassDescription(_selectedClass).toUpperCase(),
+                style: GoogleFonts.pixelifySans(
                   color: Colors.grey,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
+                  fontSize: 11,
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Stats
+            // Stats Header
             Text(
-              "Attributes",
-              style: GoogleFonts.cinzel(color: Colors.amber, fontSize: 18),
+              "ATTRIBUTES",
+              style: GoogleFonts.vt323(color: Colors.amber, fontSize: 24, letterSpacing: 1.0),
             ),
             const SizedBox(height: 8),
-            Container(
+            
+            // Attributes Panel
+            RetroPanel(
+              backgroundColor: const Color(0xFF0D0D0D),
+              borderWidth: 2,
+              bevelWidth: 2,
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[800]!),
-              ),
               child: Column(
                 children: [
-                  _buildStatRow("Strength", _strength),
-                  _buildStatRow("Speed", _speed),
-                  _buildStatRow("Max HP", _hp),
-                  _buildStatRow("Luck", _luck),
+                  _buildStatRow("STRENGTH", _strength),
+                  _buildStatRow("SPEED", _speed),
+                  _buildStatRow("MAX HP", _hp),
+                  _buildStatRow("LUCK", _luck),
                   const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
-                      foregroundColor: Colors.black,
-                    ),
+                  RetroButton(
+                    backgroundColor: Colors.amber,
                     onPressed: _rollStats,
-                    icon: const Icon(FontAwesomeIcons.diceD20),
-                    label: Text(_statsRolled ? "Re-Roll Stats" : "Roll Stats"),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(FontAwesomeIcons.diceD20, color: Colors.black),
+                        const SizedBox(width: 8),
+                        Text(
+                          _statsRolled ? "RE-ROLL STATS" : "ROLL STATS",
+                          style: GoogleFonts.vt323(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
 
-            // Create Button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _statsRolled ? Colors.green : Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: _statsRolled ? _createHero : null,
-              child: Text(
-                "BEGIN ADVENTURE",
-                style: GoogleFonts.cinzel(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+            // Create Button (Retro Style)
+            RetroButton(
+              backgroundColor: _statsRolled ? Colors.green[700] : Colors.grey[700],
+              enabled: _statsRolled,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              onPressed: _createHero,
+              child: Center(
+                child: Text(
+                  "BEGIN ADVENTURE",
+                  style: GoogleFonts.vt323(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: _statsRolled ? Colors.white : Colors.black54,
+                  ),
                 ),
               ),
             ),
@@ -324,11 +343,17 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(
+            label,
+            style: GoogleFonts.pixelifySans(
+              color: Colors.grey[400],
+              fontSize: 14,
+            ),
+          ),
           Text(
             _statsRolled ? "$value" : "?",
-            style: const TextStyle(
-              color: Colors.white,
+            style: GoogleFonts.pixelifySans(
+              color: _statsRolled ? Colors.white : Colors.amber,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),

@@ -7,6 +7,7 @@ import '../../services/hive_service.dart';
 import '../../models/museum_state.dart';
 import '../../models/item_model.dart';
 import '../../data/museum_items.dart';
+import '../widgets/retro_widgets.dart';
 
 class MuseumScreen extends ConsumerWidget {
   const MuseumScreen({super.key});
@@ -17,11 +18,17 @@ class MuseumScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: Text(
-          'The Museum',
-          style: GoogleFonts.cinzel(color: Colors.amber),
+          'THE MUSEUM',
+          style: GoogleFonts.vt323(
+            color: Colors.amber,
+            fontSize: 26,
+            letterSpacing: 1.5,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.amber),
+        elevation: 0,
       ),
       body: ValueListenableBuilder<Box<MuseumState>>(
         valueListenable: HiveService.museumBox.listenable(),
@@ -52,11 +59,11 @@ class MuseumScreen extends ConsumerWidget {
               children: [
                 _buildHeader(museumState.completionPercentage),
                 const SizedBox(height: 24),
-                _buildSection("Age of Iron", era1Items, unlockedIds),
-                _buildSection("Age of Shadows", era2Items, unlockedIds),
-                _buildSection("Age of Arcanum", era3Items, unlockedIds),
+                _buildSection("AGE OF IRON", era1Items, unlockedIds),
+                _buildSection("AGE OF SHADOWS", era2Items, unlockedIds),
+                _buildSection("AGE OF ARCANUM", era3Items, unlockedIds),
                 _buildSection(
-                  "Legendary Artifacts",
+                  "LEGENDARY ARTIFACTS",
                   legendaryItems,
                   unlockedIds,
                 ),
@@ -69,13 +76,9 @@ class MuseumScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(double percentage) {
-    return Container(
+    return RetroPanel(
+      backgroundColor: Colors.grey[900],
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
-      ),
       child: Row(
         children: [
           const Icon(
@@ -84,22 +87,26 @@ class MuseumScreen extends ConsumerWidget {
             size: 40,
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Curator's Collection",
-                style: GoogleFonts.cinzel(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "CURATOR'S COLLECTION",
+                  style: GoogleFonts.vt323(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
                 ),
-              ),
-              Text(
-                "Completion: ${(percentage * 100).toStringAsFixed(1)}%",
-                style: GoogleFonts.lato(color: Colors.grey),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  "COMPLETION: ${(percentage * 100).toStringAsFixed(1)}%",
+                  style: GoogleFonts.pixelifySans(color: Colors.grey[400], fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -118,10 +125,11 @@ class MuseumScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             title,
-            style: GoogleFonts.cinzel(
+            style: GoogleFonts.vt323(
               color: Colors.amber,
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
             ),
           ),
         ),
@@ -138,23 +146,9 @@ class MuseumScreen extends ConsumerWidget {
           itemBuilder: (context, index) {
             final itemId = itemIds[index];
             final item = MuseumItems.getById(itemId);
-            final isUnlocked = unlockedIds.contains(
-              itemId,
-            ); // Use name matching if IDs in json were names, but I used IDs in MuseumItems.
-            // Wait, in quests.json I put "specialItemReward": "Whispering Stone Fragment" (Name).
-            // But MuseumItems uses IDs like "whispering_stone_fragment".
-            // The Quest logic needs to unlock by ID or Name.
-            // The Quest logic currently likely uses the string in specialItemReward as the ID or Name.
-            // I should check how the unlock logic works.
-            // If it's not implemented yet, I need to implement it.
-            // Assuming the unlock logic will use the Name to find the Item, then add the Item ID to the museum.
+            final isUnlocked = unlockedIds.contains(itemId);
 
-            // For display here:
             if (item == null) return const SizedBox.shrink();
-
-            // Check if unlocked. The museum state stores IDs.
-            // If the quest rewards "Whispering Stone Fragment" (Name), the logic that processes the reward
-            // must find the item by Name in MuseumItems, get its ID, and add it to MuseumState.
 
             return _buildItemCard(item, isUnlocked);
           },
@@ -165,17 +159,14 @@ class MuseumScreen extends ConsumerWidget {
   }
 
   Widget _buildItemCard(Item item, bool isUnlocked) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isUnlocked
-              ? _getRarityColor(item.rarity)
-              : Colors.grey.withValues(alpha: 0.3),
-          width: isUnlocked ? 2 : 1,
-        ),
-      ),
+    final Color rarityColor = _getRarityColor(item.rarity);
+    return RetroPanel(
+      inset: true,
+      backgroundColor: isUnlocked ? Colors.grey[900] : const Color(0xFF0D0D0D),
+      outlineColor: isUnlocked ? rarityColor : Colors.black,
+      borderWidth: 1.5,
+      bevelWidth: 1.5,
+      padding: EdgeInsets.zero,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -183,29 +174,29 @@ class MuseumScreen extends ConsumerWidget {
             child: Center(
               child: isUnlocked
                   ? (item.imagePath != null
-                        ? Image.asset(item.imagePath!, fit: BoxFit.contain)
-                        : Icon(
-                            _getIconForSlot(item.slot),
-                            color: _getRarityColor(item.rarity),
-                            size: 40,
-                          ))
+                      ? Image.asset(item.imagePath!, fit: BoxFit.contain)
+                      : Icon(
+                          _getIconForSlot(item.slot),
+                          color: rarityColor,
+                          size: 32,
+                        ))
                   : Icon(
                       Icons.lock,
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      size: 30,
+                      color: Colors.grey[700],
+                      size: 24,
                     ),
             ),
           ),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             color: Colors.black54,
             child: Text(
-              isUnlocked ? item.name : "???",
-              style: GoogleFonts.cinzel(
-                color: isUnlocked ? Colors.white : Colors.grey,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+              isUnlocked ? item.name.toUpperCase() : "???",
+              style: GoogleFonts.vt323(
+                color: isUnlocked ? Colors.white : Colors.grey[600],
+                fontSize: 12,
+                letterSpacing: 0.5,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,

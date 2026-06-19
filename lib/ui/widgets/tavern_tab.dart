@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/quest_provider.dart';
 import '../../utils/asset_utils.dart';
+import 'retro_widgets.dart';
 
 class TavernTab extends ConsumerStatefulWidget {
   const TavernTab({super.key});
@@ -87,11 +88,12 @@ class _TavernTabState extends ConsumerState<TavernTab> {
             right: 0,
             child: Center(
               child: Text(
-                "The Rusty Tankard",
-                style: GoogleFonts.cinzel(
+                "THE RUSTY TANKARD",
+                style: GoogleFonts.vt323(
                   color: Colors.amber,
-                  fontSize: 32,
+                  fontSize: 36,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 2.0,
                   shadows: [
                     const Shadow(
                       color: Colors.black,
@@ -124,37 +126,37 @@ class _TavernTabState extends ConsumerState<TavernTab> {
       },
       child: Column(
         children: [
-          if (hasQuest) AnimateExclamation(),
+          if (hasQuest) const AnimateExclamation(),
           FutureBuilder<String>(
             future: AssetUtils.getRandomVariation(context, baseImagePath),
             builder: (context, snapshot) {
               final imagePath = snapshot.data ?? baseImagePath;
-              return Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.brown[700]!, width: 2),
-                  image: DecorationImage(
-                    image: AssetImage(imagePath),
-                    fit: BoxFit.cover,
-                    onError: (exception, stackTrace) {},
-                  ),
+              return RetroPanel(
+                width: 64,
+                height: 64,
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.grey[900],
+                borderWidth: 2,
+                bevelWidth: 2,
+                outlineColor: Colors.black,
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.grey),
                 ),
-                child: null,
               );
             },
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: Colors.black87,
-              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.black, width: 1.5),
             ),
             child: Text(
-              name,
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              name.toUpperCase(),
+              style: GoogleFonts.vt323(color: Colors.white, fontSize: 13),
             ),
           ),
         ],
@@ -166,16 +168,15 @@ class _TavernTabState extends ConsumerState<TavernTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: Text(name, style: const TextStyle(color: Colors.amber)),
-        content: const Text(
-          "\"Business is slow these days...\"",
-          style: TextStyle(color: Colors.white70),
+        title: Text(name.toUpperCase(), style: GoogleFonts.vt323(color: Colors.amber)),
+        content: Text(
+          "\"BUSINESS IS SLOW THESE DAYS...\"",
+          style: GoogleFonts.pixelifySans(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Leave"),
+            child: Text("LEAVE", style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18)),
           ),
         ],
       ),
@@ -197,43 +198,42 @@ class _TavernTabState extends ConsumerState<TavernTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text("A Rumor...", style: TextStyle(color: Colors.amber)),
+        title: Text("A RUMOR...", style: GoogleFonts.vt323(color: Colors.amber, fontSize: 24)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "You hear whispers of ${quest.title}.",
-              style: const TextStyle(color: Colors.white),
+              "YOU HEAR WHISPERS OF ${quest.title.toUpperCase()}.",
+              style: GoogleFonts.pixelifySans(color: Colors.white, fontSize: 13),
             ),
             const SizedBox(height: 16),
             Text(
-              quest.description,
-              style: const TextStyle(
+              quest.description.toUpperCase(),
+              style: GoogleFonts.pixelifySans(
                 color: Colors.white70,
-                fontStyle: FontStyle.italic,
+                fontSize: 11,
               ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.timer, color: Colors.grey, size: 16),
+                const Icon(Icons.timer, color: Colors.grey, size: 14),
                 const SizedBox(width: 4),
                 Text(
-                  "${quest.durationSeconds}s",
-                  style: const TextStyle(color: Colors.grey),
+                  "${quest.durationSeconds}S",
+                  style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
                 ),
                 const SizedBox(width: 16),
                 const Icon(
-                  Icons.monetization_on,
+                  FontAwesomeIcons.coins,
                   color: Colors.amber,
-                  size: 16,
+                  size: 12,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   "${quest.goldReward}",
-                  style: const TextStyle(color: Colors.amber),
+                  style: GoogleFonts.pixelifySans(color: Colors.amber, fontSize: 12),
                 ),
               ],
             ),
@@ -243,14 +243,13 @@ class _TavernTabState extends ConsumerState<TavernTab> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // Reset timer without accepting? Maybe keep it available?
-              // Let's say ignore means it's gone for now.
               _scheduleNextQuest(const Duration(hours: 10));
             },
-            child: const Text("Ignore", style: TextStyle(color: Colors.grey)),
+            child: Text("IGNORE", style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18)),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+          RetroButton(
+            backgroundColor: Colors.amber,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             onPressed: () {
               ref.read(gameProvider.notifier).discoverSideQuest(quest.id);
               _scheduleNextQuest(const Duration(hours: 10)); // 10-14 hours
@@ -259,9 +258,9 @@ class _TavernTabState extends ConsumerState<TavernTab> {
                 SnackBar(content: Text("Quest Discovered: ${quest.title}")),
               );
             },
-            child: const Text(
-              "Investigate",
-              style: TextStyle(color: Colors.black),
+            child: Text(
+              "INVESTIGATE",
+              style: GoogleFonts.vt323(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
         ],

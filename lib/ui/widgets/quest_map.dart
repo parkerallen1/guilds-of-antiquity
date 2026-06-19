@@ -16,6 +16,7 @@ import 'tavern_tab.dart';
 import 'shop_tab.dart';
 import 'hero_detail_sheet.dart';
 import 'quest_status_box.dart';
+import 'retro_widgets.dart';
 
 class QuestMap extends ConsumerWidget {
   final HeroModel? hero;
@@ -149,30 +150,22 @@ class QuestMap extends ConsumerWidget {
                                 }
                               }
                             },
-                            child: Container(
+                            child: RetroPanel(
                               width: boxWidth,
                               height: boxHeight,
-                              decoration: BoxDecoration(
-                                color: isCompleted
-                                    ? Colors.green[900]
-                                    : (isLocked
-                                          ? Colors.grey[800]
-                                          : Colors.amber[900]),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: isLocked
-                                      ? Colors.grey
-                                      : Colors.amberAccent,
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.7),
-                                    blurRadius: 4,
-                                    offset: const Offset(2, 2),
-                                  ),
-                                ],
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              backgroundColor: isCompleted
+                                  ? Colors.green[900]
+                                  : (isLocked
+                                        ? Colors.grey[800]
+                                        : Colors.amber[900]),
+                              outlineColor: Colors.black,
+                              highlightColor: isLocked
+                                  ? Colors.grey[600]
+                                  : Colors.amberAccent.withValues(alpha: 0.5),
+                              shadowColor: Colors.black54,
+                              borderWidth: 2,
+                              bevelWidth: 2,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -190,19 +183,20 @@ class QuestMap extends ConsumerWidget {
                                             : (isLocked
                                                   ? Colors.grey[400]
                                                   : Colors.amber),
-                                        size: 14,
+                                        size: 11,
                                       ),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          quest.title,
+                                          quest.title.toUpperCase(),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.cinzel(
+                                          style: GoogleFonts.vt323(
                                             color: Colors.white,
-                                            fontSize: 10,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold,
+                                            height: 0.9,
                                           ),
                                         ),
                                       ),
@@ -231,18 +225,24 @@ class QuestMap extends ConsumerWidget {
             Positioned(
               top: MediaQuery.of(context).padding.top + 100,
               left: 16,
-              child: FloatingActionButton.extended(
-                heroTag: 'side_quests',
+              child: RetroButton(
+                backgroundColor: Colors.amber,
                 onPressed: () =>
                     _showSideQuests(context, questService, currentHero!.id),
-                backgroundColor: Colors.amber,
-                icon: const Icon(FontAwesomeIcons.scroll, color: Colors.black),
-                label: Text(
-                  "Side Quests",
-                  style: GoogleFonts.cinzel(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(FontAwesomeIcons.scroll, color: Colors.black, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      "SIDE QUESTS",
+                      style: GoogleFonts.vt323(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -271,33 +271,26 @@ class QuestMap extends ConsumerWidget {
       onTap: () => _showCityMenu(context),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blueGrey[900],
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.amber, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
+          RetroPanel(
+            padding: const EdgeInsets.all(12),
+            backgroundColor: Colors.blueGrey[900],
+            borderWidth: 2,
+            bevelWidth: 2,
+            outlineColor: Colors.black,
             child: const Icon(
               FontAwesomeIcons.fortAwesome,
               color: Colors.amber,
-              size: 40,
+              size: 32,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             "CAPITAL",
-            style: GoogleFonts.cinzel(
+            style: GoogleFonts.vt323(
               color: Colors.amber,
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
               shadows: [const Shadow(blurRadius: 4, color: Colors.black)],
             ),
           ),
@@ -316,57 +309,53 @@ class QuestMap extends ConsumerWidget {
           builder: (context) => HeroDetailSheet(hero: hero),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.amber),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: RetroPanel(
+        backgroundColor: Colors.grey[900],
+        borderWidth: 2,
+        bevelWidth: 2,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: AssetImage(
-                hero.imagePath ??
-                    (hero.id.hashCode % 2 == 0
-                        ? 'assets/images/heroes/male_warrior.png'
-                        : 'assets/images/heroes/female_warrior.png'),
+            // Square portrait
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Image.asset(
+                hero.imagePath ?? 'assets/images/heroes/male_warrior.png',
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  hero.name,
-                  style: GoogleFonts.cinzel(
+                  hero.name.toUpperCase(),
+                  style: GoogleFonts.vt323(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    height: 1.0,
                   ),
                 ),
                 Text(
-                  "Lvl ${hero.level}",
-                  style: const TextStyle(color: Colors.amber, fontSize: 12),
+                  "LVL ${hero.level}",
+                  style: GoogleFonts.pixelifySans(color: Colors.amber, fontSize: 10),
                 ),
                 const SizedBox(height: 4),
-                // Mini HP Bar
+                // Retro Segmented HP Bar
                 SizedBox(
                   width: 80,
-                  child: LinearProgressIndicator(
+                  child: RetroProgressBar(
                     value: hero.hp / hero.maxHp,
-                    backgroundColor: Colors.red[900],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                    minHeight: 4,
+                    progressColor: Colors.redAccent,
+                    height: 8,
+                    segmented: false,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -531,7 +520,7 @@ class QuestMap extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.grey[900],
+      backgroundColor: Colors.transparent,
       builder: (context) => Consumer(
         builder: (context, ref, child) {
           final gameState = ref.watch(gameProvider);
@@ -546,86 +535,93 @@ class QuestMap extends ConsumerWidget {
               .whereType<Quest>()
               .toList();
 
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "Side Quests",
-                  style: GoogleFonts.cinzel(fontSize: 20, color: Colors.white),
+          return RetroPanel(
+            backgroundColor: Colors.grey[900],
+            borderWidth: 3,
+            bevelWidth: 3,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  "SIDE QUESTS",
+                  style: GoogleFonts.vt323(fontSize: 26, color: Colors.amber, letterSpacing: 1.0),
                 ),
-              ),
-              Expanded(
-                child: sideQuests.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "No side quests discovered yet.",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: sideQuests.length,
-                        itemBuilder: (context, index) {
-                          final quest = sideQuests[index];
-                          // Adjust Quest
-                          final completionCount =
-                              gameState.questCompletionCounts[quest.id] ?? 0;
-                          final adjustedQuest = QuestLogic.getAdjustedQuest(
-                            quest,
-                            completionCount,
-                          );
-                          final successChance =
-                              GameLogic.calculateSuccessChance(
-                                hero,
-                                adjustedQuest,
-                              );
+                const SizedBox(height: 8),
+                Expanded(
+                  child: sideQuests.isEmpty
+                      ? Center(
+                          child: Text(
+                            "NO SIDE QUESTS DISCOVERED YET.",
+                            style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: sideQuests.length,
+                          itemBuilder: (context, index) {
+                            final quest = sideQuests[index];
+                            // Adjust Quest
+                            final completionCount =
+                                gameState.questCompletionCounts[quest.id] ?? 0;
+                            final adjustedQuest = QuestLogic.getAdjustedQuest(
+                              quest,
+                              completionCount,
+                            );
+                            final successChance =
+                                GameLogic.calculateSuccessChance(
+                                  hero,
+                                  adjustedQuest,
+                                );
 
-                          return ListTile(
-                            isThreeLine: true,
-                            title: Text(
-                              quest.title,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Lvl ${adjustedQuest.difficulty} - ${adjustedQuest.durationSeconds}s",
-                                  style: const TextStyle(color: Colors.grey),
+                            return RetroPanel(
+                              backgroundColor: const Color(0xFF141414),
+                              padding: EdgeInsets.zero,
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              child: ListTile(
+                                title: Text(
+                                  quest.title.toUpperCase(),
+                                  style: GoogleFonts.vt323(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
-                                Text(
-                                  "Success: ${successChance.toStringAsFixed(0)}%",
-                                  style: TextStyle(
-                                    color: successChance >= 80
-                                        ? Colors.green
-                                        : (successChance >= 50
-                                              ? Colors.orange
-                                              : Colors.red),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "LVL ${adjustedQuest.difficulty} - ${adjustedQuest.durationSeconds}S",
+                                      style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 11),
+                                    ),
+                                    Text(
+                                      "SUCCESS: ${successChance.toStringAsFixed(0)}%",
+                                      style: GoogleFonts.pixelifySans(
+                                        color: successChance >= 80
+                                            ? Colors.green
+                                            : (successChance >= 50
+                                                  ? Colors.orange
+                                                  : Colors.red),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                trailing: RetroButton(
+                                  backgroundColor: Colors.amber,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  onPressed: () {
+                                    Navigator.pop(context); // Close sheet
+                                    _startQuest(context, ref, adjustedQuest, hero);
+                                  },
+                                  child: Text(
+                                    "EMBARK",
+                                    style: GoogleFonts.vt323(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
                                   ),
                                 ),
-                              ],
-                            ),
-                            trailing: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber,
                               ),
-                              onPressed: () {
-                                Navigator.pop(context); // Close sheet
-                                _startQuest(context, ref, adjustedQuest, hero);
-                              },
-                              child: const Text(
-                                "Start",
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -652,67 +648,69 @@ class QuestMap extends ConsumerWidget {
           );
 
           return AlertDialog(
-            backgroundColor: Colors.grey[850],
             title: Text(
-              quest.title,
-              style: GoogleFonts.cinzel(color: Colors.white),
+              quest.title.toUpperCase(),
+              style: GoogleFonts.vt323(color: Colors.amber, fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  quest.description,
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 16),
-                _buildInfoRow(
-                  "Recommended Level",
-                  "${adjustedQuest.difficulty}",
-                ),
-                _buildInfoRow("Duration", "${adjustedQuest.durationSeconds}s"),
-                _buildInfoRow("Gold Reward", "${adjustedQuest.goldReward}"),
-                _buildInfoRow("XP Reward", "${adjustedQuest.xpReward}"),
-                const SizedBox(height: 16),
-                const Divider(color: Colors.grey),
-                const SizedBox(height: 8),
-                Text(
-                  "Estimates:",
-                  style: GoogleFonts.cinzel(color: Colors.white70),
-                ),
-                _buildInfoRow(
-                  "Success Chance",
-                  "${GameLogic.calculateSuccessChance(hero, adjustedQuest).toStringAsFixed(1)}%",
-                  color:
-                      GameLogic.calculateSuccessChance(hero, adjustedQuest) >=
-                          80
-                      ? Colors.green
-                      : Colors.red,
-                ),
-                _buildInfoRow(
-                  "Est. HP Loss",
-                  "${GameLogic.calculateHealthLoss(hero, adjustedQuest)} HP",
-                  color: Colors.redAccent,
-                ),
-              ],
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    quest.description.toUpperCase(),
+                    style: GoogleFonts.pixelifySans(color: Colors.white70, fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInfoRow(
+                    "RECOMMENDED LEVEL",
+                    "${adjustedQuest.difficulty}",
+                  ),
+                  _buildInfoRow("DURATION", "${adjustedQuest.durationSeconds}S"),
+                  _buildInfoRow("GOLD REWARD", "${adjustedQuest.goldReward}"),
+                  _buildInfoRow("XP REWARD", "${adjustedQuest.xpReward}"),
+                  const SizedBox(height: 12),
+                  const Divider(color: Colors.black, thickness: 2),
+                  const SizedBox(height: 8),
+                  Text(
+                    "ESTIMATES:",
+                    style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
+                  ),
+                  _buildInfoRow(
+                    "SUCCESS CHANCE",
+                    "${GameLogic.calculateSuccessChance(hero, adjustedQuest).toStringAsFixed(1)}%",
+                    color:
+                        GameLogic.calculateSuccessChance(hero, adjustedQuest) >=
+                            80
+                        ? Colors.green
+                        : Colors.red,
+                  ),
+                  _buildInfoRow(
+                    "EST. HP LOSS",
+                    "${GameLogic.calculateHealthLoss(hero, adjustedQuest)} HP",
+                    color: Colors.redAccent,
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.grey),
+                child: Text(
+                  "CANCEL",
+                  style: GoogleFonts.vt323(color: Colors.grey, fontSize: 18),
                 ),
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+              RetroButton(
+                backgroundColor: Colors.amber,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 onPressed: () {
                   Navigator.pop(context);
                   _startQuest(context, ref, adjustedQuest, hero);
                 },
-                child: const Text(
-                  "Embark",
-                  style: TextStyle(color: Colors.black),
+                child: Text(
+                  "EMBARK",
+                  style: GoogleFonts.vt323(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -728,12 +726,16 @@ class QuestMap extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(
+            label,
+            style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
+          ),
           Text(
             value,
-            style: TextStyle(
+            style: GoogleFonts.pixelifySans(
               color: color ?? Colors.amber,
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
           ),
         ],

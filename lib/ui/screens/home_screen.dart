@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/stage_section.dart';
 import '../widgets/quest_map.dart';
+import '../widgets/retro_widgets.dart';
 import '../screens/hero_creation_screen.dart';
 
 import '../../services/ticker_service.dart';
@@ -50,46 +51,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // No Hero Overlay
           if (hero == null)
             Container(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: Colors.black.withValues(alpha: 0.75),
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Your journey begins...",
-                      style: GoogleFonts.cinzel(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HeroCreationScreen(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: RetroPanel(
+                    backgroundColor: Colors.grey[900],
+                    borderWidth: 3.0,
+                    bevelWidth: 3.0,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "YOUR JOURNEY BEGINS...",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.vt323(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.0,
                           ),
-                        );
-                      },
-                      child: Text(
-                        "Recruit Mercenary",
-                        style: GoogleFonts.cinzel(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
+                        const SizedBox(height: 32),
+                        RetroButton(
+                          backgroundColor: Colors.amber[600],
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HeroCreationScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "RECRUIT MERCENARY",
+                            style: GoogleFonts.vt323(
+                              color: Colors.black,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
