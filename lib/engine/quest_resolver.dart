@@ -114,7 +114,18 @@ class QuestResolver {
       }
 
       goldGained = goldReward;
-      xpGained = (xpReward * 1.0).round();
+
+      // Catch-up XP (P1.2): a hero taking on a quest above their level earns
+      // bonus XP that scales with how far under the quest's difficulty they
+      // are (up to +100% at 10+ levels under). This closes early walls — e.g.
+      // the 5->10 defend_village gap — faster, while at-or-above-level rewards
+      // are untouched.
+      final int underLevelled = quest.difficulty - hero.level;
+      double catchUpMult = 1.0;
+      if (underLevelled > 0) {
+        catchUpMult += (underLevelled * 0.1).clamp(0.0, 1.0);
+      }
+      xpGained = (xpReward * catchUpMult).round();
 
       loot = GameLogic.generateLoot(hero.level, hero);
 

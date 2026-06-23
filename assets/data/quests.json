@@ -139,6 +139,28 @@
             "specialItemDescription": "A root from the heart of the forest, twisted by dark magic."
         },
         {
+            "id": "scout_outriders",
+            "title": "Bandit Outriders",
+            "description": "Bandit riders are probing the village defenses and memorizing the guard rotation. Thin their scouts before the real assault comes.",
+            "difficulty": 8,
+            "durationSeconds": 45,
+            "goldReward": 90,
+            "xpReward": 280,
+            "dropRate": 0.3,
+            "isMainQuest": true,
+            "requiredQuestId": "clear_forest",
+            "mapX": 0.5,
+            "mapY": 0.5,
+            "isReplayable": true,
+            "repeatGoldReward": 30,
+            "repeatXpReward": 70,
+            "lore": [
+                "The riders wear no colors, but their horses are army-bred.",
+                "One scout carries a charcoal sketch of the village's gate watch.",
+                "They flee the moment the fight turns — they were only here to count."
+            ]
+        },
+        {
             "id": "goblin_scout",
             "title": "The Parley",
             "description": "A goblin scout has been spotted. He is carrying a white flag, but the guards want him dead.",
@@ -192,7 +214,7 @@
             "xpReward": 500,
             "dropRate": 0.4,
             "isMainQuest": true,
-            "requiredQuestId": "clear_forest",
+            "requiredQuestId": "scout_outriders",
             "mapX": 0.6,
             "mapY": 0.4,
             "lore": [
