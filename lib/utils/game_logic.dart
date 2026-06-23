@@ -39,6 +39,14 @@ class GameLogic {
     // Example: Success 100%, Def 10. 90 - 110 = -20 (0% loss).
     // Example: Success 50%, Def 0. 90 - 50 = 40% loss.
     double loss = 90 - (successChance + hero.totalDef);
+
+    // Early-game cushion (P1.1): the 90-(success+def) curve punishes low-level,
+    // low-success heroes hardest — under-levelled early fights bleed 30%+ per
+    // attempt. Subtract a flat cushion that fades from 15% at L1 to 0 by L11,
+    // leaving the at-level and late-game curve untouched.
+    final double earlyCushion = max(0.0, 15.0 - (hero.level - 1) * 1.5);
+    loss -= earlyCushion;
+
     return max(0, loss.round());
   }
 

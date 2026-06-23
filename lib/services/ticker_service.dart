@@ -49,14 +49,18 @@ class TickerService {
       }
     }
 
-    // 2. Passive healing. Idle heroes recover slowly; downed (recovering)
-    //    heroes recover ~3x faster, then flip back to idle once fully healed.
-    for (final hero in heroes) {
-      final isResting =
+    // 2. Passive healing. Heroes regenerate while idle, while recovering
+    //    (downed, ~3x faster), AND now while questing too (P1.1) — so the old
+    //    "fight → stop → wait to heal → fight" loop no longer serializes the
+    //    game. Re-read the latest heroes so one whose quest just completed
+    //    above (now idle) isn't healed off the stale questing snapshot.
+    for (final hero in ref.read(heroProvider)) {
+      final canRegen =
           hero.status == HeroStatus.idle ||
-          hero.status == HeroStatus.recovering;
+          hero.status == HeroStatus.recovering ||
+          hero.status == HeroStatus.questing;
 
-      if (isResting && hero.hp < hero.maxHp) {
+      if (canRegen && hero.hp < hero.maxHp) {
         // Heal to 100% in 1 hour (3600s) base; Speed reduces this time.
         // Use a per-tick probability so fractional heal rates average out.
         double speedFactor = 100.0 / (100.0 + hero.totalSpd);
