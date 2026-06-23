@@ -21,6 +21,12 @@ class TickerService {
   Timer? _timer;
   final Random _random = Random();
 
+  /// Anti-repetition tracking (P1.3): the last quest resolved and how many
+  /// times in a row it has been run, so back-to-back repeats of the same node
+  /// earn tapering rewards. Session-scoped (this service lives for the run).
+  String? _lastQuestId;
+  int _questStreak = 0;
+
   TickerService(this.ref);
 
   void start() {
@@ -136,12 +142,19 @@ class TickerService {
     // headless balance simulator runs). This computes success, rewards, loot,
     // leveling, damage and survival; we apply the side effects below.
     final alreadyCompleted = gameState.completedQuestIds.contains(quest.id);
+    final bool sameAsLast = _lastQuestId == quest.id;
+    final int priorStreak = sameAsLast ? _questStreak : 0;
     final outcome = QuestResolver.resolve(
       hero,
       quest,
       alreadyCompleted: alreadyCompleted,
       activeArtifacts: gameState.activeArtifacts,
+      sameQuestStreak: priorStreak,
     );
+    // Advance the anti-repetition streak: another run of the same node grows
+    // it; switching to a different node resets it (full rewards next time).
+    _questStreak = sameAsLast ? _questStreak + 1 : 1;
+    _lastQuestId = quest.id;
 
     if (outcome.success) {
       gameNotifier.addGold(outcome.goldGained);

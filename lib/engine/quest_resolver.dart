@@ -90,6 +90,7 @@ class QuestResolver {
     Quest quest, {
     required bool alreadyCompleted,
     List<Artifact> activeArtifacts = const [],
+    int sameQuestStreak = 0,
   }) {
     final success = GameLogic.calculateCombatSuccess(hero, quest);
 
@@ -113,8 +114,6 @@ class QuestResolver {
         xpReward = quest.repeatXpReward ?? (quest.xpReward ~/ 2);
       }
 
-      goldGained = goldReward;
-
       // Catch-up XP (P1.2): a hero taking on a quest above their level earns
       // bonus XP that scales with how far under the quest's difficulty they
       // are (up to +100% at 10+ levels under). This closes early walls — e.g.
@@ -125,7 +124,14 @@ class QuestResolver {
       if (underLevelled > 0) {
         catchUpMult += (underLevelled * 0.1).clamp(0.0, 1.0);
       }
-      xpGained = (xpReward * catchUpMult).round();
+
+      // Anti-repetition (P1.3): rewards taper when the SAME quest is run
+      // back-to-back, nudging the player to rotate nodes instead of spamming
+      // one. Switching to a different quest resets the streak (full rewards).
+      final double varietyMult = (1.0 - sameQuestStreak * 0.05).clamp(0.5, 1.0);
+
+      goldGained = (goldReward * varietyMult).round();
+      xpGained = (xpReward * catchUpMult * varietyMult).round();
 
       loot = GameLogic.generateLoot(hero.level, hero);
 
