@@ -11,6 +11,7 @@ import '../services/audio_service.dart';
 import '../providers/log_provider.dart';
 import '../utils/loot_factory.dart';
 import '../utils/quest_factory.dart';
+import '../models/meta_upgrade.dart';
 
 final gameProvider = StateNotifierProvider<GameNotifier, GameState>((ref) {
   final feedback = ref.read(feedbackServiceProvider);
@@ -51,6 +52,10 @@ class GameState {
   final int lifetimeGoldEarned;
   final int lifetimeItemsFound;
 
+  // Ancient-Coin meta tree: upgrade enum index -> purchased level. Permanent
+  // (survives prestige).
+  final Map<int, int> metaUpgradeLevels;
+
   GameState({
     required this.gold,
     required this.lastSaveTime,
@@ -71,7 +76,23 @@ class GameState {
     required this.questCompletionCounts,
     this.lifetimeGoldEarned = 0,
     this.lifetimeItemsFound = 0,
+    this.metaUpgradeLevels = const {},
   });
+
+  int metaLevel(MetaUpgrade u) => metaUpgradeLevels[u.index] ?? 0;
+
+  double get metaGoldMultiplier =>
+      1.0 + MetaUpgradeCatalog.of(MetaUpgrade.greed).valueAt(metaLevel(MetaUpgrade.greed));
+  double get metaXpMultiplier =>
+      1.0 + MetaUpgradeCatalog.of(MetaUpgrade.scholar).valueAt(metaLevel(MetaUpgrade.scholar));
+  double get metaDurationMultiplier =>
+      1.0 + MetaUpgradeCatalog.of(MetaUpgrade.haste).valueAt(metaLevel(MetaUpgrade.haste));
+  double get metaHealMultiplier =>
+      1.0 + MetaUpgradeCatalog.of(MetaUpgrade.vigor).valueAt(metaLevel(MetaUpgrade.vigor));
+  double get metaDropBonus =>
+      MetaUpgradeCatalog.of(MetaUpgrade.fortune).valueAt(metaLevel(MetaUpgrade.fortune));
+  double get metaCoinMultiplier =>
+      1.0 + MetaUpgradeCatalog.of(MetaUpgrade.legacy).valueAt(metaLevel(MetaUpgrade.legacy));
 
   // Helper to get vault capacity
   int get vaultCapacity => vaultLevel;
@@ -238,6 +259,10 @@ class GameNotifier extends StateNotifier<GameState> {
         'lifetimeItemsFound',
         defaultValue: 0,
       ),
+      metaUpgradeLevels:
+          (HiveService.settingsBox.get('metaUpgradeLevels', defaultValue: {})
+                  as Map)
+              .map((k, v) => MapEntry(int.parse(k.toString()), v as int)),
     );
   }
 
@@ -247,6 +272,8 @@ class GameNotifier extends StateNotifier<GameState> {
     for (var artifact in state.activeArtifacts) {
       finalAmount = artifact.modifyGoldGain(finalAmount);
     }
+    // P3.1: the Greed meta upgrade boosts all positive gold gains.
+    if (amount > 0) finalAmount *= state.metaGoldMultiplier;
 
     final int earned = finalAmount.toInt();
     final newGold = state.gold + earned;
@@ -641,9 +668,44 @@ class GameNotifier extends StateNotifier<GameState> {
     addHint(eligibleQuestIds.first);
   }
 
+  /// Spend Ancient Coins on a permanent meta upgrade (P3.1).
+  void buyMetaUpgrade(MetaUpgrade upgrade) {
+    final level = state.metaLevel(upgrade);
+    final cost = MetaUpgradeCatalog.of(upgrade).costAt(level);
+    if (cost == null) {
+      _feedback.showFloatingText("Already maxed!", FeedbackType.info);
+      return;
+    }
+    if (state.ancientCoins < cost) {
+      _feedback.showFloatingText(
+        "Not enough Ancient Coins!",
+        FeedbackType.error,
+      );
+      return;
+    }
+
+    final newCoins = state.ancientCoins - cost;
+    final newLevels = Map<int, int>.from(state.metaUpgradeLevels);
+    newLevels[upgrade.index] = level + 1;
+
+    HiveService.settingsBox.put('ancientCoins', newCoins);
+    HiveService.settingsBox.put(
+      'metaUpgradeLevels',
+      newLevels.map((k, v) => MapEntry(k.toString(), v)),
+    );
+    state = _copyWith(ancientCoins: newCoins, metaUpgradeLevels: newLevels);
+
+    _feedback.showFloatingText(
+      "${MetaUpgradeCatalog.of(upgrade).title} upgraded!",
+      FeedbackType.success,
+    );
+    _audio.playGoldSound();
+  }
+
   Future<void> resetGame() async {
-    // 1. Calculate Prestige Currency
-    final earnedCoins = (state.gold / 10000).floor();
+    // 1. Calculate Prestige Currency (Legacy meta upgrade boosts the yield).
+    final earnedCoins =
+        ((state.gold / 10000).floor() * state.metaCoinMultiplier).floor();
     final newAncientCoins = state.ancientCoins + earnedCoins;
     HiveService.settingsBox.put('ancientCoins', newAncientCoins);
 
@@ -712,6 +774,8 @@ class GameNotifier extends StateNotifier<GameState> {
       // Lifetime totals survive prestige — they're cross-run records.
       lifetimeGoldEarned: state.lifetimeGoldEarned,
       lifetimeItemsFound: state.lifetimeItemsFound,
+      // The Ancient-Coin meta tree is permanent across prestige.
+      metaUpgradeLevels: state.metaUpgradeLevels,
     );
   }
 
@@ -741,6 +805,7 @@ class GameNotifier extends StateNotifier<GameState> {
     Map<String, int>? questCompletionCounts,
     int? lifetimeGoldEarned,
     int? lifetimeItemsFound,
+    Map<int, int>? metaUpgradeLevels,
   }) {
     return GameState(
       gold: gold ?? state.gold,
@@ -764,6 +829,7 @@ class GameNotifier extends StateNotifier<GameState> {
           questCompletionCounts ?? state.questCompletionCounts,
       lifetimeGoldEarned: lifetimeGoldEarned ?? state.lifetimeGoldEarned,
       lifetimeItemsFound: lifetimeItemsFound ?? state.lifetimeItemsFound,
+      metaUpgradeLevels: metaUpgradeLevels ?? state.metaUpgradeLevels,
     );
   }
 }

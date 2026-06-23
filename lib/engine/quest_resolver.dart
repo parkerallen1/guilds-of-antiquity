@@ -92,6 +92,8 @@ class QuestResolver {
     List<Artifact> activeArtifacts = const [],
     int sameQuestStreak = 0,
     int questsSinceDrop = 0,
+    double xpMultiplier = 1.0,
+    double dropBonus = 0.0,
   }) {
     final success = GameLogic.calculateCombatSuccess(hero, quest);
 
@@ -131,13 +133,16 @@ class QuestResolver {
       // one. Switching to a different quest resets the streak (full rewards).
       final double varietyMult = (1.0 - sameQuestStreak * 0.05).clamp(0.5, 1.0);
 
+      // xpMultiplier / dropBonus carry the Scholar / Fortune meta upgrades
+      // (P3.1); they default to neutral so the sim and tests are unaffected.
       goldGained = (goldReward * varietyMult).round();
-      xpGained = (xpReward * catchUpMult * varietyMult).round();
+      xpGained = (xpReward * catchUpMult * varietyMult * xpMultiplier).round();
 
       loot = GameLogic.generateLoot(
         hero.level,
         hero,
         questsSinceDrop: questsSinceDrop,
+        dropBonus: dropBonus,
       );
 
       // First-time special reward.

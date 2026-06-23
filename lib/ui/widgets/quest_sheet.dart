@@ -585,7 +585,7 @@ class QuestSheet extends ConsumerWidget {
     int duration = GameLogic.calculateQuestDuration(
       hero,
       quest,
-      durationMultiplier: 1.0,
+      durationMultiplier: gameState.metaDurationMultiplier, // Haste (P3.1)
     );
 
     for (var artifact in activeArtifacts) {

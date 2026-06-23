@@ -65,6 +65,7 @@ class TickerService {
     //    "fight → stop → wait to heal → fight" loop no longer serializes the
     //    game. Re-read the latest heroes so one whose quest just completed
     //    above (now idle) isn't healed off the stale questing snapshot.
+    final double healMult = ref.read(gameProvider).metaHealMultiplier;
     for (final hero in ref.read(heroProvider)) {
       final canRegen =
           hero.status == HeroStatus.idle ||
@@ -76,7 +77,8 @@ class TickerService {
         // Use a per-tick probability so fractional heal rates average out.
         double speedFactor = 100.0 / (100.0 + hero.totalSpd);
         double timeToHeal = 3600.0 * speedFactor;
-        double healPerSec = hero.maxHp / timeToHeal;
+        // Vigor meta upgrade (P3.1) speeds passive regen.
+        double healPerSec = (hero.maxHp / timeToHeal) * healMult;
         if (hero.status == HeroStatus.recovering) healPerSec *= 3.0;
 
         if (_random.nextDouble() < healPerSec) {
@@ -156,6 +158,8 @@ class TickerService {
       activeArtifacts: gameState.activeArtifacts,
       sameQuestStreak: priorStreak,
       questsSinceDrop: _questsSinceDrop,
+      xpMultiplier: gameState.metaXpMultiplier,
+      dropBonus: gameState.metaDropBonus,
     );
     // Advance the anti-repetition streak: another run of the same node grows
     // it; switching to a different node resets it (full rewards next time).

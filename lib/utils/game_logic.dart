@@ -76,9 +76,14 @@ class GameLogic {
     return finalDuration < 1 ? 1 : finalDuration;
   }
 
-  static Item? generateLoot(int level, HeroModel hero, {int questsSinceDrop = 0}) {
-    // Base drop rate + Luck.
-    double chance = 0.1 + (hero.totalLuck * 0.01);
+  static Item? generateLoot(
+    int level,
+    HeroModel hero, {
+    int questsSinceDrop = 0,
+    double dropBonus = 0.0,
+  }) {
+    // Base drop rate + Luck + the Fortune meta upgrade (P3.1).
+    double chance = 0.1 + (hero.totalLuck * 0.01) + dropBonus;
 
     // Pity (P1.5): the longer the dry streak, the higher the chance — ramping
     // to a guaranteed drop by ~10 dry quests so a drought can't run forever.
