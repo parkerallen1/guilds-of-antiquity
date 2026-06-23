@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/hero_provider.dart';
 import '../../providers/daily_provider.dart';
+import '../../providers/milestone_provider.dart';
 import 'daily_sheet.dart';
 
 class StageSection extends ConsumerWidget {
@@ -15,7 +16,9 @@ class StageSection extends ConsumerWidget {
     final gameState = ref.watch(gameProvider);
     final heroes = ref.watch(heroProvider);
     ref.watch(dailyProvider);
-    final hasDailyClaim = ref.read(dailyProvider.notifier).hasClaimable;
+    ref.watch(milestoneProvider);
+    final hasDailyClaim = ref.read(dailyProvider.notifier).hasClaimable ||
+        ref.read(milestoneProvider.notifier).hasClaimable;
 
     return SafeArea(
       bottom: false,

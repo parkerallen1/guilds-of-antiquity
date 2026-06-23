@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../models/daily_objective.dart';
+import '../../models/milestone.dart';
 import '../../providers/daily_provider.dart';
+import '../../providers/milestone_provider.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/hero_provider.dart';
 import '../../providers/quest_provider.dart';
@@ -34,6 +36,8 @@ class DailySheet extends ConsumerWidget {
     final daily = ref.watch(dailyProvider);
     final notifier = ref.read(dailyProvider.notifier);
     final questService = ref.watch(questServiceProvider);
+    ref.watch(milestoneProvider);
+    final milestones = ref.read(milestoneProvider.notifier);
 
     return RetroPanel(
       backgroundColor: const Color(0xFF1A1A1A),
@@ -47,7 +51,7 @@ class DailySheet extends ConsumerWidget {
           children: [
             Center(
               child: Text(
-                "DAILY",
+                "GOALS",
                 style: GoogleFonts.vt323(
                   color: Colors.amber,
                   fontSize: 30,
@@ -100,6 +104,26 @@ class DailySheet extends ConsumerWidget {
                   },
                 ),
             ],
+
+            // --- Milestones (lifetime, one-time) ---
+            const SizedBox(height: 16),
+            _sectionLabel("MILESTONES"),
+            const SizedBox(height: 8),
+            for (final def in MilestoneCatalog.tracks)
+              Builder(
+                builder: (context) {
+                  final claimed = milestones.claimedCount(def.track);
+                  final next = def.nextTier(claimed);
+                  final current = milestones.currentValue(def.track);
+                  return _MilestoneTile(
+                    title: def.title,
+                    current: current,
+                    tier: next,
+                    canClaim: milestones.canClaim(def.track),
+                    onClaim: () => milestones.claim(def.track),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -248,6 +272,91 @@ class _ObjectiveTile extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MilestoneTile extends StatelessWidget {
+  final String title;
+  final int current;
+  final MilestoneTier? tier; // null => all tiers cleared
+  final bool canClaim;
+  final VoidCallback onClaim;
+  const _MilestoneTile({
+    required this.title,
+    required this.current,
+    required this.tier,
+    required this.canClaim,
+    required this.onClaim,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tier = this.tier;
+    return RetroPanel(
+      backgroundColor: Colors.grey[900],
+      borderWidth: 2,
+      bevelWidth: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: GoogleFonts.vt323(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 6),
+                if (tier == null)
+                  Text(
+                    "ALL MILESTONES CLEARED",
+                    style: GoogleFonts.pixelifySans(
+                      color: Colors.greenAccent,
+                      fontSize: 11,
+                    ),
+                  )
+                else ...[
+                  RetroProgressBar(
+                    value: (current / tier.threshold).clamp(0.0, 1.0),
+                    progressColor: Colors.cyanAccent,
+                    height: 12,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "$current / ${tier.threshold}   •   +${tier.rewardGold} G",
+                    style: GoogleFonts.pixelifySans(
+                      color: Colors.grey[400],
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (tier != null) ...[
+            const SizedBox(width: 12),
+            canClaim
+                ? RetroButton(
+                    backgroundColor: Colors.amber,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    onPressed: onClaim,
+                    child: Text(
+                      "CLAIM",
+                      style: GoogleFonts.vt323(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : const Icon(FontAwesomeIcons.lock, color: Colors.white24, size: 16),
+          ],
         ],
       ),
     );
