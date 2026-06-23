@@ -237,6 +237,15 @@ class DailyNotifier extends StateNotifier<DailyState> {
 
   bool canClaim(int index) => isComplete(index) && !state.claimed[index];
 
+  /// Whether anything is waiting to be claimed (drives the entry-point badge).
+  bool get hasClaimable {
+    if (!state.loginClaimedToday) return true;
+    for (int i = 0; i < state.objectives.length; i++) {
+      if (canClaim(i)) return true;
+    }
+    return false;
+  }
+
   void claimObjective(int index) {
     if (!canClaim(index)) return;
     final reward = state.objectives[index].rewardGold;

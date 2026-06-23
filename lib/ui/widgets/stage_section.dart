@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/hero_provider.dart';
+import '../../providers/daily_provider.dart';
+import 'daily_sheet.dart';
 
 class StageSection extends ConsumerWidget {
   const StageSection({super.key});
@@ -11,6 +14,8 @@ class StageSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameState = ref.watch(gameProvider);
     final heroes = ref.watch(heroProvider);
+    ref.watch(dailyProvider);
+    final hasDailyClaim = ref.read(dailyProvider.notifier).hasClaimable;
 
     return SafeArea(
       bottom: false,
@@ -58,12 +63,45 @@ class StageSection extends ConsumerWidget {
               ],
             ),
 
-            // Debug Theme Cycle (Center)
-            IconButton(
-              icon: const Icon(Icons.color_lens, color: Colors.white24),
-              onPressed: () {
-                ref.read(gameProvider.notifier).debugCycleEra();
-              },
+            // Daily goals (Center)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        FontAwesomeIcons.calendarDay,
+                        color: Colors.amber,
+                        size: 22,
+                      ),
+                      tooltip: 'Daily',
+                      onPressed: () => showDailySheet(context, ref),
+                    ),
+                    if (hasDailyClaim)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                // Debug Theme Cycle
+                IconButton(
+                  icon: const Icon(Icons.color_lens, color: Colors.white24),
+                  onPressed: () {
+                    ref.read(gameProvider.notifier).debugCycleEra();
+                  },
+                ),
+              ],
             ),
 
             // Mercenaries counter
