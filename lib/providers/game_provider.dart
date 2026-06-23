@@ -46,6 +46,11 @@ class GameState {
   final Map<String, int> questHints;
   final Map<String, int> questCompletionCounts;
 
+  // Lifetime totals for the daily-objective layer. Monotonic — they only ever
+  // increase, so day-start baselines can measure "today's" progress.
+  final int lifetimeGoldEarned;
+  final int lifetimeItemsFound;
+
   GameState({
     required this.gold,
     required this.lastSaveTime,
@@ -64,6 +69,8 @@ class GameState {
     this.inventoryLimit = 20,
     required this.questHints,
     required this.questCompletionCounts,
+    this.lifetimeGoldEarned = 0,
+    this.lifetimeItemsFound = 0,
   });
 
   // Helper to get vault capacity
@@ -223,6 +230,14 @@ class GameNotifier extends StateNotifier<GameState> {
       inventoryLimit: inventoryLimit,
       questHints: questHints,
       questCompletionCounts: questCompletionCounts,
+      lifetimeGoldEarned: HiveService.settingsBox.get(
+        'lifetimeGoldEarned',
+        defaultValue: 0,
+      ),
+      lifetimeItemsFound: HiveService.settingsBox.get(
+        'lifetimeItemsFound',
+        defaultValue: 0,
+      ),
     );
   }
 
@@ -233,9 +248,13 @@ class GameNotifier extends StateNotifier<GameState> {
       finalAmount = artifact.modifyGoldGain(finalAmount);
     }
 
-    final newGold = state.gold + finalAmount.toInt();
+    final int earned = finalAmount.toInt();
+    final newGold = state.gold + earned;
+    final newLifetimeGold =
+        state.lifetimeGoldEarned + (earned > 0 ? earned : 0);
     HiveService.settingsBox.put('gold', newGold);
-    state = _copyWith(gold: newGold);
+    HiveService.settingsBox.put('lifetimeGoldEarned', newLifetimeGold);
+    state = _copyWith(gold: newGold, lifetimeGoldEarned: newLifetimeGold);
 
     // Feedback
     if (amount > 0 && showFeedback) {
@@ -261,7 +280,12 @@ class GameNotifier extends StateNotifier<GameState> {
       return;
     }
     HiveService.inventoryBox.add(item);
-    state = _copyWith(inventory: [...state.inventory, item]);
+    final newLifetimeItems = state.lifetimeItemsFound + 1;
+    HiveService.settingsBox.put('lifetimeItemsFound', newLifetimeItems);
+    state = _copyWith(
+      inventory: [...state.inventory, item],
+      lifetimeItemsFound: newLifetimeItems,
+    );
 
     // Phase 4: Museum Update
     unlockMuseumItem(item.id);
@@ -685,6 +709,9 @@ class GameNotifier extends StateNotifier<GameState> {
       inventoryLimit: 20,
       questHints: {},
       questCompletionCounts: {},
+      // Lifetime totals survive prestige — they're cross-run records.
+      lifetimeGoldEarned: state.lifetimeGoldEarned,
+      lifetimeItemsFound: state.lifetimeItemsFound,
     );
   }
 
@@ -712,6 +739,8 @@ class GameNotifier extends StateNotifier<GameState> {
     int? inventoryLimit,
     Map<String, int>? questHints,
     Map<String, int>? questCompletionCounts,
+    int? lifetimeGoldEarned,
+    int? lifetimeItemsFound,
   }) {
     return GameState(
       gold: gold ?? state.gold,
@@ -733,6 +762,8 @@ class GameNotifier extends StateNotifier<GameState> {
       questHints: questHints ?? state.questHints,
       questCompletionCounts:
           questCompletionCounts ?? state.questCompletionCounts,
+      lifetimeGoldEarned: lifetimeGoldEarned ?? state.lifetimeGoldEarned,
+      lifetimeItemsFound: lifetimeItemsFound ?? state.lifetimeItemsFound,
     );
   }
 }
