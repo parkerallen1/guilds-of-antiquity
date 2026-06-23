@@ -7,6 +7,7 @@ import '../../services/hive_service.dart';
 import '../../models/museum_state.dart';
 import '../../models/item_model.dart';
 import '../../data/museum_items.dart';
+import '../../data/museum_sets.dart';
 import '../widgets/retro_widgets.dart';
 
 class MuseumScreen extends ConsumerWidget {
@@ -58,7 +59,9 @@ class MuseumScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(museumState.completionPercentage),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                _buildSetRewards(unlockedIds),
+                const SizedBox(height: 8),
                 _buildSection("AGE OF IRON", era1Items, unlockedIds),
                 _buildSection("AGE OF SHADOWS", era2Items, unlockedIds),
                 _buildSection("AGE OF ARCANUM", era3Items, unlockedIds),
@@ -108,6 +111,85 @@ class MuseumScreen extends ConsumerWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSetRewards(Set<String> unlockedIds) {
+    final unlocked = unlockedIds.toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "COLLECTION REWARDS",
+          style: GoogleFonts.vt323(
+            color: Colors.cyanAccent,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (final set in MuseumSets.all)
+          _buildSetRewardTile(set, unlocked),
+      ],
+    );
+  }
+
+  Widget _buildSetRewardTile(MuseumSet set, List<String> unlockedIds) {
+    final unlocked = set.unlockedCount(unlockedIds);
+    final total = set.itemIds.length;
+    final complete = unlocked >= total;
+    return RetroPanel(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      backgroundColor: Colors.grey[900],
+      borderWidth: 2,
+      bevelWidth: 2,
+      highlightColor:
+          (complete ? Colors.amber : Colors.transparent).withValues(alpha: 0.18),
+      child: Row(
+        children: [
+          Icon(
+            complete ? FontAwesomeIcons.medal : FontAwesomeIcons.lock,
+            color: complete ? Colors.amber : Colors.grey[700],
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${set.title} → ${set.artifactName}".toUpperCase(),
+                  style: GoogleFonts.vt323(color: Colors.white, fontSize: 17),
+                ),
+                Text(
+                  set.rewardDescription,
+                  style: GoogleFonts.pixelifySans(
+                    color: Colors.grey[400],
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                RetroProgressBar(
+                  value: total == 0 ? 0 : unlocked / total,
+                  progressColor: complete ? Colors.amber : Colors.cyanAccent,
+                  height: 10,
+                  segments: total,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          if (complete)
+            const Icon(FontAwesomeIcons.check, color: Colors.green, size: 16)
+          else
+            Text(
+              "$unlocked/$total",
+              style: GoogleFonts.vt323(color: Colors.grey[400], fontSize: 16),
+            ),
         ],
       ),
     );

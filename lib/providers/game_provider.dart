@@ -5,6 +5,7 @@ import '../models/business_model.dart';
 import '../models/artifact.dart';
 import '../models/museum_state.dart';
 import '../models/log_entry_model.dart';
+import '../data/museum_sets.dart';
 
 import '../services/feedback_service.dart';
 import '../services/audio_service.dart';
@@ -349,6 +350,25 @@ class GameNotifier extends StateNotifier<GameState> {
         "Museum Collection Updated!",
         FeedbackType.info,
       );
+
+      // Museum-set completion grants the set's Artifact (P3.2/P3.3). This is
+      // driven by the fresh unlock, so it fires exactly once per set — even
+      // the consumable Phoenix Feather won't re-grant later.
+      final set = MuseumSets.setContaining(itemId);
+      if (set != null &&
+          set.isComplete(newIds) &&
+          !state.activeArtifactIds.contains(set.artifactId)) {
+        addArtifact(set.artifactId);
+        _log.addLog(
+          "${set.title} collection complete! Earned the ${set.artifactName}.",
+          LogType.loot,
+        );
+        _feedback.showFloatingText(
+          "ARTIFACT EARNED: ${set.artifactName}!",
+          FeedbackType.success,
+        );
+        _audio.playLegendaryDrop();
+      }
     }
   }
 
