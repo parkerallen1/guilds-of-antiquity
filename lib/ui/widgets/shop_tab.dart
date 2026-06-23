@@ -481,11 +481,16 @@ class _ShopTabState extends ConsumerState<ShopTab> {
         .where((q) => q.requiredHints > 0)
         .toList();
 
-    // 2. Filter for quests that still need hints
-    final eligibleQuests = legendaryQuests.where((q) {
-      final currentHints = gameState.questHints[q.id] ?? 0;
-      return currentHints < q.requiredHints;
-    }).toList();
+    // 2. Filter for quests that still need hints, lowest difficulty first so a
+    //    shard always advances the nearest legendary quest (P1.4). Previously a
+    //    shard hit a RANDOM eligible quest, so progress on the one you wanted
+    //    (e.g. dragon_lair) was taxed by hints wasted on others.
+    final eligibleQuests =
+        legendaryQuests.where((q) {
+          final currentHints = gameState.questHints[q.id] ?? 0;
+          return currentHints < q.requiredHints;
+        }).toList()
+          ..sort((a, b) => a.difficulty.compareTo(b.difficulty));
 
     if (eligibleQuests.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -494,7 +499,7 @@ class _ShopTabState extends ConsumerState<ShopTab> {
       return;
     }
 
-    // 3. Call buyShard with eligible IDs
+    // 3. Call buyShard with eligible IDs (lowest-difficulty first).
     ref
         .read(gameProvider.notifier)
         .buyShard(eligibleQuests.map((q) => q.id).toList());

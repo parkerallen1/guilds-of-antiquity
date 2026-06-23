@@ -611,11 +611,10 @@ class GameNotifier extends StateNotifier<GameState> {
 
     spendGold(shardCost);
 
-    // Pick random quest
-    final random = DateTime.now().millisecondsSinceEpoch;
-    final questId = eligibleQuestIds[random % eligibleQuestIds.length];
-
-    addHint(questId);
+    // Target the first eligible quest. The caller passes them lowest-difficulty
+    // first (P1.4), so a shard always advances the nearest legendary quest
+    // instead of landing on a random one and wasting gold.
+    addHint(eligibleQuestIds.first);
   }
 
   Future<void> resetGame() async {
