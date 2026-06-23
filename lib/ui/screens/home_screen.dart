@@ -7,6 +7,8 @@ import '../widgets/retro_widgets.dart';
 import '../screens/hero_creation_screen.dart';
 
 import '../../services/ticker_service.dart';
+import '../../services/offline_service.dart';
+import '../dialogs/welcome_back_dialog.dart';
 
 import '../../providers/hero_provider.dart';
 
@@ -17,18 +19,53 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   late TickerService _tickerService;
+  late OfflineService _offlineService;
 
   @override
   void initState() {
     super.initState();
     _tickerService = TickerService(ref);
+    _offlineService = OfflineService(ref);
+    WidgetsBinding.instance.addObserver(this);
     _tickerService.start();
+    // Catch up on anything that accrued since the last session (offline heal +
+    // a finished business job), then welcome the player back.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runOfflineCatchUp());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _runOfflineCatchUp();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _offlineService.recordSeen();
+        break;
+    }
+  }
+
+  void _runOfflineCatchUp() {
+    final report = _offlineService.catchUp();
+    if (report != null && report.isMeaningful && mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => WelcomeBackDialog(report: report),
+      );
+    }
   }
 
   @override
   void dispose() {
+    _offlineService.recordSeen();
+    WidgetsBinding.instance.removeObserver(this);
     _tickerService.stop();
     super.dispose();
   }
