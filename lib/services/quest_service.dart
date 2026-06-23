@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../models/quest_model.dart';
+import 'hive_service.dart';
 
 class QuestService {
   List<Quest> _allQuests = [];
@@ -43,11 +44,13 @@ class QuestService {
   }
 
   Quest? getQuestById(String id) {
-    try {
-      return _allQuests.firstWhere((q) => q.id == id);
-    } catch (e) {
-      return null;
+    for (final q in _allQuests) {
+      if (q.id == id) return q;
     }
+    // Dynamically-generated quests (lodge scouting + daily bounties) live in
+    // the Hive quest box, not the bundled asset list. Without this fallback
+    // they couldn't be resolved by the UI or the ticker once discovered.
+    return HiveService.questsBox.get(id);
   }
 
   List<Quest> getRandomSideQuests(int count) {
