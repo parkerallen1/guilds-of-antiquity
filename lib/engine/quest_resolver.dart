@@ -2,6 +2,7 @@ import '../models/hero_model.dart';
 import '../models/quest_model.dart';
 import '../models/item_model.dart';
 import '../models/artifact.dart';
+import '../models/hero_class.dart';
 import '../data/museum_items.dart';
 import '../utils/game_logic.dart';
 
@@ -133,16 +134,22 @@ class QuestResolver {
       // one. Switching to a different quest resets the streak (full rewards).
       final double varietyMult = (1.0 - sameQuestStreak * 0.05).clamp(0.5, 1.0);
 
+      // Class passive (P3.4): Thief earns more gold, Mage more XP, Ranger more
+      // loot. Neutral for unknown classes (e.g. the sim's 'Mercenary').
+      final cls = HeroClasses.of(hero.classType);
+
       // xpMultiplier / dropBonus carry the Scholar / Fortune meta upgrades
       // (P3.1); they default to neutral so the sim and tests are unaffected.
-      goldGained = (goldReward * varietyMult).round();
-      xpGained = (xpReward * catchUpMult * varietyMult * xpMultiplier).round();
+      goldGained = (goldReward * varietyMult * cls.goldMult).round();
+      xpGained =
+          (xpReward * catchUpMult * varietyMult * xpMultiplier * cls.xpMult)
+              .round();
 
       loot = GameLogic.generateLoot(
         hero.level,
         hero,
         questsSinceDrop: questsSinceDrop,
-        dropBonus: dropBonus,
+        dropBonus: dropBonus + cls.dropBonus,
       );
 
       // First-time special reward.

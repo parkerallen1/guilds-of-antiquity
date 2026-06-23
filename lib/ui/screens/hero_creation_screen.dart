@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../providers/hero_provider.dart';
 import '../../models/hero_model.dart';
+import '../../models/hero_class.dart';
 import '../../utils/text_gen.dart';
 import '../widgets/retro_widgets.dart';
 
@@ -87,18 +88,17 @@ class _HeroCreationScreenState extends ConsumerState<HeroCreationScreen> {
   };
 
   String _getClassDescription(String className) {
-    switch (className) {
-      case 'Warrior':
-        return "Masters of combat with high Strength and Vitality, but slower movement.";
-      case 'Ranger':
-        return "Balanced adventurers with good Speed and Luck.";
-      case 'Mage':
-        return "Wielders of arcane power with high damage potential but low durability.";
-      case 'Thief':
-        return "Agile and lucky, excelling in Speed and avoiding danger.";
-      default:
-        return "";
-    }
+    final passive = HeroClasses.of(className);
+    final flavor = switch (className) {
+      'Warrior' =>
+        "Masters of combat with high Strength and Vitality, but slower movement.",
+      'Ranger' => "Balanced adventurers with good Speed and Luck.",
+      'Mage' =>
+        "Wielders of arcane power with high damage potential but low durability.",
+      'Thief' => "Agile and lucky, excelling in Speed and avoiding danger.",
+      _ => "",
+    };
+    return "$flavor\n★ ${passive.name}: ${passive.description}";
   }
 
   @override

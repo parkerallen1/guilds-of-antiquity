@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/hero_model.dart';
+import '../../models/hero_class.dart';
 import '../../models/item_model.dart';
 import '../../providers/hero_provider.dart';
 import '../../providers/game_provider.dart';
@@ -60,6 +61,13 @@ class HeroDetailSheet extends ConsumerWidget {
                   Text(
                     "LEVEL ${currentHero.level} ${currentHero.classType.toUpperCase()}",
                     style: GoogleFonts.pixelifySans(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    "★ ${HeroClasses.of(currentHero.classType).name}: ${HeroClasses.of(currentHero.classType).description}",
+                    style: GoogleFonts.pixelifySans(
+                      color: Colors.amber,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),

@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/hero_model.dart';
+import '../models/hero_class.dart';
 import '../models/quest_model.dart';
 import '../models/item_model.dart';
 import 'loot_factory.dart';
@@ -53,7 +54,9 @@ class GameLogic {
   static int calculateHealthLoss(HeroModel hero, Quest quest) {
     double chance = calculateSuccessChance(hero, quest);
     int lossPercent = calculateHealthLossPercent(hero, chance);
-    return (hero.maxHp * (lossPercent / 100.0)).round();
+    // Class passive (P3.4): Warrior takes less damage. Neutral otherwise.
+    final double classMult = HeroClasses.of(hero.classType).damageTakenMult;
+    return (hero.maxHp * (lossPercent / 100.0) * classMult).round();
   }
 
   static int calculateQuestDuration(
