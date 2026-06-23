@@ -12,6 +12,7 @@ import '../../services/quest_service.dart';
 import '../../utils/quest_logic.dart';
 import '../screens/hall_screen.dart';
 import '../screens/museum_screen.dart';
+import '../screens/legacy_screen.dart';
 import 'tavern_tab.dart';
 import 'shop_tab.dart';
 import 'hero_detail_sheet.dart';
@@ -469,6 +470,16 @@ class QuestMap extends ConsumerWidget {
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const MuseumScreen()),
+                  ),
+                ),
+                _buildCityOption(
+                  context,
+                  "Legacy",
+                  FontAwesomeIcons.crown,
+                  Colors.cyan,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LegacyScreen()),
                   ),
                 ),
               ],
