@@ -9,6 +9,12 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # The headless balance simulator under sim/ is a standalone Dart package with
+  # its own pubspec/analysis context; it is not part of the Flutter app build.
+  exclude:
+    - sim/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

@@ -1,0 +1,8 @@
+name: goa_sim
+description: Headless balance simulator for Guilds of Antiquity (reuses real game logic).
+publish_to: 'none'
+environment:
+  sdk: ^3.9.0
+dependencies:
+  hive: ^2.2.3
+  uuid: ^4.5.2
