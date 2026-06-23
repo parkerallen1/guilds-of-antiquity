@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/hero_provider.dart';
 import '../providers/game_provider.dart';
@@ -26,6 +27,10 @@ class TickerService {
   /// earn tapering rewards. Session-scoped (this service lives for the run).
   String? _lastQuestId;
   int _questStreak = 0;
+
+  /// Loot pity tracking (P1.5): successful quests since the last random drop,
+  /// so a long dry streak ramps the drop chance toward a guarantee.
+  int _questsSinceDrop = 0;
 
   TickerService(this.ref);
 
@@ -150,6 +155,7 @@ class TickerService {
       alreadyCompleted: alreadyCompleted,
       activeArtifacts: gameState.activeArtifacts,
       sameQuestStreak: priorStreak,
+      questsSinceDrop: _questsSinceDrop,
     );
     // Advance the anti-repetition streak: another run of the same node grows
     // it; switching to a different node resets it (full rewards next time).
@@ -187,21 +193,19 @@ class TickerService {
         audio.playLegendaryDrop();
       }
 
-      // Random loot drop.
+      // Random loot drop. Reset the pity counter on a drop; otherwise count
+      // this dry quest (P1.5).
       final Item? loot = outcome.loot;
+      _questsSinceDrop = loot != null ? 0 : _questsSinceDrop + 1;
       if (loot != null) {
         logNotifier.addLog(
           "FOUND: ${loot.name} (${loot.rarity.name})!",
           LogType.loot,
         );
         gameNotifier.addItem(loot);
-        if (loot.rarity == ItemRarity.legendary) {
-          audio.playLegendaryDrop();
-          feedback.vibrate();
-        } else {
-          feedback.lightImpact();
-        }
-        feedback.showFloatingText('Found ${loot.name}!', FeedbackType.info);
+        // Rarity-scaled juice (P1.5): better gear gets a bigger, louder,
+        // colour-coded celebration; commons stay quiet so they don't over-juice.
+        _playLootFeedback(feedback, audio, loot);
       }
 
       gameNotifier.completeQuest(quest.id);
@@ -274,6 +278,71 @@ class TickerService {
     ref
         .read(questResultProvider.notifier)
         .update((state) => {...state, hero.id: result});
+  }
+
+  /// Rarity-scaled loot celebration (P1.5): colour, text size, haptics and SFX
+  /// all scale with rarity, with a stamp on the rarer drops. Commons stay quiet
+  /// so a 10-gold pickup isn't over-juiced.
+  void _playLootFeedback(
+    FeedbackService feedback,
+    AudioService audio,
+    Item loot,
+  ) {
+    final Color color = _rarityColor(loot.rarity);
+    switch (loot.rarity) {
+      case ItemRarity.legendary:
+        audio.playLegendaryDrop();
+        feedback.vibrate();
+        feedback.triggerShake();
+        feedback.showFloatingText(
+          '★ LEGENDARY! ${loot.name}',
+          FeedbackType.info,
+          color: color,
+          scale: 1.6,
+        );
+        break;
+      case ItemRarity.epic:
+        audio.playGoldSound();
+        feedback.heavyImpact();
+        feedback.showFloatingText(
+          '✦ EPIC! ${loot.name}',
+          FeedbackType.info,
+          color: color,
+          scale: 1.3,
+        );
+        break;
+      case ItemRarity.rare:
+        feedback.mediumImpact();
+        feedback.showFloatingText(
+          'NEW! ${loot.name}',
+          FeedbackType.info,
+          color: color,
+          scale: 1.1,
+        );
+        break;
+      default: // common / quest
+        feedback.lightImpact();
+        feedback.showFloatingText(
+          'Found ${loot.name}',
+          FeedbackType.info,
+          color: color,
+        );
+    }
+  }
+
+  Color _rarityColor(ItemRarity rarity) {
+    switch (rarity) {
+      case ItemRarity.common:
+        return Colors.grey;
+      case ItemRarity.rare:
+        return Colors.blueAccent;
+      case ItemRarity.epic:
+        return Colors.purpleAccent;
+      case ItemRarity.legendary:
+        return Colors.amber;
+      case ItemRarity.quest:
+        return Colors.tealAccent;
+    }
   }
 }
 

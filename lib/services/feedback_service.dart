@@ -12,8 +12,16 @@ class FeedbackRequest {
   final FeedbackType type;
   final String message;
   final dynamic data; // For coordinates or other data
+  final Color? color; // Optional explicit colour (overrides the type colour).
+  final double scale; // Text-size multiplier, for rarity-scaled juice.
 
-  FeedbackRequest(this.type, this.message, [this.data]);
+  FeedbackRequest(
+    this.type,
+    this.message, {
+    this.data,
+    this.color,
+    this.scale = 1.0,
+  });
 }
 
 class FeedbackService {
@@ -41,8 +49,16 @@ class FeedbackService {
   }
 
   // Visuals
-  void showFloatingText(String text, FeedbackType type, {dynamic position}) {
-    _feedbackController.add(FeedbackRequest(type, text, position));
+  void showFloatingText(
+    String text,
+    FeedbackType type, {
+    dynamic position,
+    Color? color,
+    double scale = 1.0,
+  }) {
+    _feedbackController.add(
+      FeedbackRequest(type, text, data: position, color: color, scale: scale),
+    );
   }
 
   void triggerShake() {

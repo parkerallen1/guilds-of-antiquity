@@ -91,6 +91,7 @@ class QuestResolver {
     required bool alreadyCompleted,
     List<Artifact> activeArtifacts = const [],
     int sameQuestStreak = 0,
+    int questsSinceDrop = 0,
   }) {
     final success = GameLogic.calculateCombatSuccess(hero, quest);
 
@@ -133,7 +134,11 @@ class QuestResolver {
       goldGained = (goldReward * varietyMult).round();
       xpGained = (xpReward * catchUpMult * varietyMult).round();
 
-      loot = GameLogic.generateLoot(hero.level, hero);
+      loot = GameLogic.generateLoot(
+        hero.level,
+        hero,
+        questsSinceDrop: questsSinceDrop,
+      );
 
       // First-time special reward.
       if (isFirstTime && quest.specialItemReward != null) {

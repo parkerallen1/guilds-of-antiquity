@@ -66,6 +66,8 @@ class _GameFeedbackWrapperState extends ConsumerState<GameFeedbackWrapper>
       default:
         color = Colors.white;
     }
+    // An explicit colour (e.g. loot rarity) overrides the type colour.
+    if (request.color != null) color = request.color!;
 
     // Determine position (default to center or tap position if provided)
     Offset position = request.data is Offset
@@ -83,7 +85,7 @@ class _GameFeedbackWrapperState extends ConsumerState<GameFeedbackWrapper>
                     request.message,
                     style: TextStyle(
                       color: color,
-                      fontSize: 24,
+                      fontSize: 24 * request.scale,
                       fontWeight: FontWeight.bold,
                       shadows: [Shadow(blurRadius: 2, color: Colors.black)],
                     ),

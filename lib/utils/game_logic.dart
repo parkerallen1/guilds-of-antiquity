@@ -76,11 +76,19 @@ class GameLogic {
     return finalDuration < 1 ? 1 : finalDuration;
   }
 
-  static Item? generateLoot(int level, HeroModel hero) {
-    // Base drop rate + Luck
+  static Item? generateLoot(int level, HeroModel hero, {int questsSinceDrop = 0}) {
+    // Base drop rate + Luck.
     double chance = 0.1 + (hero.totalLuck * 0.01);
+
+    // Pity (P1.5): the longer the dry streak, the higher the chance — ramping
+    // to a guaranteed drop by ~10 dry quests so a drought can't run forever.
+    chance += questsSinceDrop * 0.09;
+
     if (_random.nextDouble() < chance) {
-      return LootFactory.generate(level);
+      // Rarity-floor pity: a long drought nudges the roll toward better gear,
+      // so the drought-breaking drop isn't just another common.
+      final int rarityBonus = questsSinceDrop >= 8 ? 20 : 0;
+      return LootFactory.generate(level, rarityBonus: rarityBonus);
     }
     return null;
   }
