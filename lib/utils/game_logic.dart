@@ -61,10 +61,12 @@ class GameLogic {
     Quest quest, {
     double durationMultiplier = 1.0,
   }) {
-    // New Speed Logic: Time / (1 + Speed/100)
-    // Example: Speed 100 => Time / 2. Speed 300 => Time / 4.
-    // Protect against divide by zero (though speed is usually >= 0)
-    double speedFactor = 1 + (hero.totalSpd / 100.0);
+    // Speed reduces quest time, but with diminishing returns (P3.4) so it no
+    // longer linearly dominates throughput and other stats stay relevant.
+    // Early Speed is still strong; stacking it has clear falloff.
+    //   Spd 100 => x1.87, Spd 300 => x3.07, Spd 500 => x3.86 (was x2/x4/x6).
+    final double spd = hero.totalSpd.toDouble();
+    double speedFactor = 1 + spd / (100.0 + spd * 0.15);
     if (speedFactor < 1.0) speedFactor = 1.0; // Minimum factor
 
     double reducedDuration = quest.durationSeconds / speedFactor;
