@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Glyph only, transparent background, scaled + recentred into the
+       Android adaptive-icon safe zone (~66% centre). -->
+  <g transform="translate(512 512) scale(0.78) translate(-512 -519)">
+    <!-- Shield -->
+    <path d="M332,360 L692,360 L692,560 C692,690 600,760 512,800 C424,760 332,690 332,560 Z"
+          fill="#E0A92E" stroke="#000000" stroke-width="16" stroke-linejoin="round"/>
+    <path d="M360,388 L664,388 L664,558 C664,664 588,726 512,760 C436,726 360,664 360,558 Z"
+          fill="none" stroke="#F4CF6A" stroke-width="8" stroke-linejoin="round"/>
+
+    <!-- Sword (over the shield) -->
+    <polygon points="512,238 534,300 534,602 490,602 490,300"
+             fill="#D7D9E0" stroke="#000000" stroke-width="10" stroke-linejoin="round"/>
+    <rect x="508" y="312" width="8" height="280" fill="#A9AEBC"/>
+    <rect x="398" y="586" width="228" height="30" rx="4" fill="#D99A2B" stroke="#000000" stroke-width="10"/>
+    <rect x="498" y="614" width="28" height="80" fill="#5A3A1A" stroke="#000000" stroke-width="8"/>
+    <circle cx="512" cy="708" r="28" fill="#D99A2B" stroke="#000000" stroke-width="10"/>
+  </g>
+</svg>
