@@ -306,133 +306,192 @@ class QuestSheet extends ConsumerWidget {
       return isDiscovered || hasHints;
     }).toList();
 
+    // Sort into three tiers: available → hint-locked → completed (non-replayable)
+    visibleQuests.sort((a, b) {
+      int tier(Quest q) {
+        final isCompleted = state.completedQuestIds.contains(q.id);
+        if (isCompleted && !q.isReplayable) return 2;
+        final currentHints = state.questHints[q.id] ?? 0;
+        if (q.requiredHints > 0 && currentHints < q.requiredHints) return 1;
+        return 0;
+      }
+
+      final ta = tier(a);
+      final tb = tier(b);
+      if (ta != tb) return ta.compareTo(tb);
+      return a.difficulty.compareTo(b.difficulty);
+    });
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.grey[900],
-      builder: (context) => Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Side Quests",
-              style: GoogleFonts.cinzel(fontSize: 20, color: Colors.white),
-            ),
-          ),
-          Expanded(
-            child: visibleQuests.isEmpty
-                ? const Center(
-                    child: Text(
-                      "No side quests discovered yet.",
-                      style: TextStyle(color: Colors.grey),
+      builder: (sheetCtx) {
+        final lastId = state.lastSideQuestId;
+        final lastQuest = lastId != null ? service.getQuestById(lastId) : null;
+        final canRedo = lastQuest != null &&
+            state.discoveredSideQuestIds.contains(lastQuest.id);
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Side Quests",
+                    style: GoogleFonts.cinzel(fontSize: 20, color: Colors.white),
+                  ),
+                  if (canRedo)
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.amber,
+                        backgroundColor: Colors.amber.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: const BorderSide(
+                              color: Colors.amber, width: 1),
+                        ),
+                      ),
+                      icon: const Icon(FontAwesomeIcons.arrowRotateLeft,
+                          size: 12),
+                      label: Text(
+                        "Redo: ${lastQuest!.title}",
+                        style: const TextStyle(fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: () {
+                        final completionCount =
+                            state.questCompletionCounts[lastQuest.id] ?? 0;
+                        final adjusted = QuestLogic.getAdjustedQuest(
+                          lastQuest,
+                          completionCount,
+                        );
+                        Navigator.pop(sheetCtx);
+                        _startQuest(context, ref, adjusted, hero);
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: visibleQuests.length,
-                    itemBuilder: (context, index) {
-                      final quest = visibleQuests[index];
-                      final isCompleted = state.completedQuestIds.contains(
-                        quest.id,
-                      );
-                      final currentHints = state.questHints[quest.id] ?? 0;
-                      final isLockedByHints =
-                          quest.requiredHints > 0 &&
-                          currentHints < quest.requiredHints;
+                ],
+              ),
+            ),
+            Expanded(
+              child: visibleQuests.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No side quests discovered yet.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: visibleQuests.length,
+                      itemBuilder: (context, index) {
+                        final quest = visibleQuests[index];
+                        final isCompleted = state.completedQuestIds.contains(
+                          quest.id,
+                        );
+                        final currentHints = state.questHints[quest.id] ?? 0;
+                        final isLockedByHints =
+                            quest.requiredHints > 0 &&
+                            currentHints < quest.requiredHints;
 
-                      // Adjust Quest
-                      final completionCount =
-                          state.questCompletionCounts[quest.id] ?? 0;
-                      final adjustedQuest = QuestLogic.getAdjustedQuest(
-                        quest,
-                        completionCount,
-                      );
-                      final successChance = GameLogic.calculateSuccessChance(
-                        hero,
-                        adjustedQuest,
-                      );
+                        // Adjust Quest
+                        final completionCount =
+                            state.questCompletionCounts[quest.id] ?? 0;
+                        final adjustedQuest = QuestLogic.getAdjustedQuest(
+                          quest,
+                          completionCount,
+                        );
+                        final successChance = GameLogic.calculateSuccessChance(
+                          hero,
+                          adjustedQuest,
+                        );
 
-                      if (isCompleted && !quest.isReplayable) {
+                        if (isCompleted && !quest.isReplayable) {
+                          return ListTile(
+                            title: Text(
+                              quest.title,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              "Completed",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          );
+                        }
+
                         return ListTile(
+                          isThreeLine: true,
                           title: Text(
                             quest.title,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
+                            style: GoogleFonts.cinzel(
+                              color: isLockedByHints
+                                  ? Colors.purpleAccent.withValues(alpha: 0.7)
+                                  : Colors.white,
                             ),
                           ),
-                          subtitle: const Text(
-                            "Completed",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        );
-                      }
-
-                      return ListTile(
-                        isThreeLine: true,
-                        title: Text(
-                          quest.title,
-                          style: GoogleFonts.cinzel(
-                            color: isLockedByHints
-                                ? Colors.purpleAccent.withValues(alpha: 0.7)
-                                : Colors.white,
-                          ),
-                        ),
-                        subtitle: isLockedByHints
-                            ? Text(
-                                "Hints: $currentHints / ${quest.requiredHints} - Keep progressing to find more hints.",
-                                style: const TextStyle(
-                                  color: Colors.purpleAccent,
-                                ),
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Lvl ${adjustedQuest.difficulty} - ${adjustedQuest.durationSeconds}s${isCompleted ? ' (Replay)' : ''}",
-                                    style: const TextStyle(color: Colors.grey),
+                          subtitle: isLockedByHints
+                              ? Text(
+                                  "Hints: $currentHints / ${quest.requiredHints} - Keep progressing to find more hints.",
+                                  style: const TextStyle(
+                                    color: Colors.purpleAccent,
                                   ),
-                                  Text(
-                                    "Success: ${successChance.toStringAsFixed(0)}%",
-                                    style: TextStyle(
-                                      color: successChance >= 80
-                                          ? Colors.green
-                                          : (successChance >= 50
-                                                ? Colors.orange
-                                                : Colors.red),
-                                      fontSize: 12,
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "Lvl ${adjustedQuest.difficulty} - ${adjustedQuest.durationSeconds}s${isCompleted ? ' (Replay)' : ''}",
+                                      style: const TextStyle(color: Colors.grey),
                                     ),
+                                    Text(
+                                      "Success: ${successChance.toStringAsFixed(0)}%",
+                                      style: TextStyle(
+                                        color: successChance >= 80
+                                            ? Colors.green
+                                            : (successChance >= 50
+                                                  ? Colors.orange
+                                                  : Colors.red),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          trailing: isLockedByHints
+                              ? const Icon(
+                                  FontAwesomeIcons.lock,
+                                  color: Colors.grey,
+                                )
+                              : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.amber,
                                   ),
-                                ],
-                              ),
-                        trailing: isLockedByHints
-                            ? const Icon(
-                                FontAwesomeIcons.lock,
-                                color: Colors.grey,
-                              )
-                            : ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _startQuest(
+                                      context,
+                                      ref,
+                                      adjustedQuest,
+                                      hero,
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Start",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _startQuest(
-                                    context,
-                                    ref,
-                                    adjustedQuest,
-                                    hero,
-                                  );
-                                },
-                                child: const Text(
-                                  "Start",
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -592,10 +651,16 @@ class QuestSheet extends ConsumerWidget {
       duration = artifact.modifyQuestDuration(duration);
     }
 
+    // Track last side quest for the "Redo" button.
+    if (!quest.isMainQuest) {
+      ref.read(gameProvider.notifier).setLastSideQuestId(quest.id);
+    }
+
     final updatedHero = hero.copyWith(
       status: HeroStatus.questing,
       questCompletesAt: DateTime.now().add(Duration(seconds: duration)),
       activeQuestId: quest.id,
+      activeQuestActualDuration: duration,
     );
 
     ref.read(heroProvider.notifier).updateHero(updatedHero);

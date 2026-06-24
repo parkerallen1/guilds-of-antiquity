@@ -37,13 +37,14 @@ class HeroModelAdapter extends TypeAdapter<HeroModel> {
       luck: fields[17] as int?,
       activeQuestId: fields[18] as String?,
       imagePath: fields[19] as String?,
+      activeQuestActualDuration: fields[20] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, HeroModel obj) {
     writer
-      ..writeByte(20)
+      ..writeByte(21)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -83,7 +84,9 @@ class HeroModelAdapter extends TypeAdapter<HeroModel> {
       ..writeByte(18)
       ..write(obj.activeQuestId)
       ..writeByte(19)
-      ..write(obj.imagePath);
+      ..write(obj.imagePath)
+      ..writeByte(20)
+      ..write(obj.activeQuestActualDuration);
   }
 
   @override

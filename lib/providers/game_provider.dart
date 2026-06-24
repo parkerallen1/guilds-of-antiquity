@@ -48,6 +48,9 @@ class GameState {
   final Map<String, int> questHints;
   final Map<String, int> questCompletionCounts;
 
+  // The ID of the most recently started side quest, used for the "Redo Last" button.
+  final String? lastSideQuestId;
+
   // Lifetime totals for the daily-objective layer. Monotonic — they only ever
   // increase, so day-start baselines can measure "today's" progress.
   final int lifetimeGoldEarned;
@@ -75,6 +78,7 @@ class GameState {
     this.inventoryLimit = 20,
     required this.questHints,
     required this.questCompletionCounts,
+    this.lastSideQuestId,
     this.lifetimeGoldEarned = 0,
     this.lifetimeItemsFound = 0,
     this.metaUpgradeLevels = const {},
@@ -252,6 +256,7 @@ class GameNotifier extends StateNotifier<GameState> {
       inventoryLimit: inventoryLimit,
       questHints: questHints,
       questCompletionCounts: questCompletionCounts,
+      lastSideQuestId: HiveService.settingsBox.get('lastSideQuestId'),
       lifetimeGoldEarned: HiveService.settingsBox.get(
         'lifetimeGoldEarned',
         defaultValue: 0,
@@ -667,6 +672,11 @@ class GameNotifier extends StateNotifier<GameState> {
     _log.addLog("You found a hint for a legendary quest.", LogType.info);
   }
 
+  void setLastSideQuestId(String questId) {
+    HiveService.settingsBox.put('lastSideQuestId', questId);
+    state = _copyWith(lastSideQuestId: questId);
+  }
+
   // Revised buyShard to handle the logic if we pass the eligible quests
   void buyShard(List<String> eligibleQuestIds) {
     const shardCost = 500;
@@ -760,6 +770,7 @@ class GameNotifier extends StateNotifier<GameState> {
     HiveService.settingsBox.delete('inventoryLimit');
     HiveService.settingsBox.delete('questHints');
     HiveService.settingsBox.delete('questCompletionCounts');
+    HiveService.settingsBox.delete('lastSideQuestId');
 
     // 3. The Advance
     final newEraIndex = state.currentEraIndex + 1;
@@ -823,6 +834,7 @@ class GameNotifier extends StateNotifier<GameState> {
     int? inventoryLimit,
     Map<String, int>? questHints,
     Map<String, int>? questCompletionCounts,
+    String? lastSideQuestId,
     int? lifetimeGoldEarned,
     int? lifetimeItemsFound,
     Map<int, int>? metaUpgradeLevels,
@@ -847,6 +859,7 @@ class GameNotifier extends StateNotifier<GameState> {
       questHints: questHints ?? state.questHints,
       questCompletionCounts:
           questCompletionCounts ?? state.questCompletionCounts,
+      lastSideQuestId: lastSideQuestId ?? state.lastSideQuestId,
       lifetimeGoldEarned: lifetimeGoldEarned ?? state.lifetimeGoldEarned,
       lifetimeItemsFound: lifetimeItemsFound ?? state.lifetimeItemsFound,
       metaUpgradeLevels: metaUpgradeLevels ?? state.metaUpgradeLevels,

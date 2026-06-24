@@ -77,6 +77,11 @@ class HeroModel {
   @HiveField(19)
   final String? imagePath;
 
+  // The actual computed quest duration (seconds) at the time the quest was started.
+  // Used for lore progression so Speed and meta bonuses don't desync the flavor text.
+  @HiveField(20)
+  final int? activeQuestActualDuration;
+
   HeroModel({
     required this.id,
     required this.name,
@@ -98,6 +103,7 @@ class HeroModel {
     this.luck = 0,
     this.activeQuestId,
     this.imagePath,
+    this.activeQuestActualDuration,
   }) : inventory = inventory ?? [];
 
   // Computed Stats
@@ -158,6 +164,7 @@ class HeroModel {
     int? luck,
     String? activeQuestId,
     String? imagePath,
+    int? activeQuestActualDuration,
   }) {
     return HeroModel(
       id: id ?? this.id,
@@ -180,6 +187,7 @@ class HeroModel {
       luck: luck ?? this.luck,
       activeQuestId: activeQuestId ?? this.activeQuestId,
       imagePath: imagePath ?? this.imagePath,
+      activeQuestActualDuration: activeQuestActualDuration ?? this.activeQuestActualDuration,
     );
   }
 }

@@ -81,8 +81,11 @@ class _QuestStatusBoxState extends ConsumerState<QuestStatusBox> {
       return;
     }
 
-    final totalDuration = Duration(seconds: quest.durationSeconds);
-    // Avoid division by zero
+    // Use the actual computed duration stored at quest-start time so that
+    // Speed and Haste bonuses don't desync lore pacing from the timer.
+    final totalSeconds =
+        widget.hero.activeQuestActualDuration ?? quest.durationSeconds;
+    final totalDuration = Duration(seconds: totalSeconds);
     if (totalDuration.inSeconds == 0) return;
 
     final progress =
